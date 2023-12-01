@@ -74,7 +74,6 @@ main = do
   let part = Part1
 
   -- prompt <- runAoC_ options $ AoCPrompt day
-
   input <- runAoC_ options $ AoCInput day
   let result = getSolution day part (unpack input)
   print result
