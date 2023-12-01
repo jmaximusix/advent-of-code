@@ -45,7 +45,6 @@ import qualified Day6
 import qualified Day7
 import qualified Day8
 import qualified Day9
-import Debug.Trace (traceShowId)
 import LoadEnv (loadEnv)
 import System.Environment (getEnv)
 import THUtils (solutions)

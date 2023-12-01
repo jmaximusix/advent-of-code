@@ -48,6 +48,8 @@ executable advent-of-code2023
         advent-of-code-api,
         template-haskell,
         load-env,
+        containers,
+        safe,
         text
 
     hs-source-dirs:   app
