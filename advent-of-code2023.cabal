@@ -51,6 +51,8 @@ executable advent-of-code2023
         containers,
         safe,
         split,
+        ghc,
+        extra,
         text
 
     hs-source-dirs:   app
