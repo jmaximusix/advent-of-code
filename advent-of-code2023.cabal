@@ -50,6 +50,7 @@ executable advent-of-code2023
         load-env,
         containers,
         safe,
+        split,
         text
 
     hs-source-dirs:   app

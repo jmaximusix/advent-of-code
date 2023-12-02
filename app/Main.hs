@@ -69,12 +69,16 @@ main = do
             _aForce = False,
             _aThrottle = 3000000
           }
-  let day = mkDay_ 1
+  let day = mkDay_ 2
   let part = Part1
 
   -- prompt <- runAoC_ options $ AoCPrompt day
   input <- runAoC_ options $ AoCInput day
   let result = getSolution day part (unpack input)
   print result
-  response <- runAoC_ options $ AoCSubmit day part (show result)
-  print $ showSubmitRes (snd response)
+
+  let result = getSolution day Part2 (unpack input)
+  print result
+
+-- response <- runAoC_ options $ AoCSubmit day part (show result)
+-- print $ showSubmitRes (snd response)
