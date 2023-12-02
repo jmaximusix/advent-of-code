@@ -69,7 +69,7 @@ main = do
             _aForce = False,
             _aThrottle = 3000000
           }
-  let day = mkDay_ 2
+  let day = mkDay_ 1
   let part = Part1
 
   -- prompt <- runAoC_ options $ AoCPrompt day
