@@ -3,44 +3,48 @@ module Day3 (part1, part2) where
 import Data.Char (isDigit)
 import Data.List (nub)
 import Data.List.Split (chunksOf)
-import Data.Maybe (catMaybes, isJust, mapMaybe)
-import Debug.Trace (traceShow, traceShowId)
+import Data.Maybe (catMaybes, fromJust, isJust, mapMaybe)
+
+type Grid = [[Char]]
+
+type Pos = (Int, Int)
 
 part1, part2 :: String -> Int
-part1 input = sum $ mapMaybe (isPartNumber (lines input)) [(x, y) | y <- [0 .. length (lines input)], x <- [0 .. length (head (lines input))]]
-part2 input = sum $ mapMaybe (maybeGearRatio (lines input)) [(x, y) | y <- [0 .. length (lines input)], x <- [0 .. length (head (lines input))]]
+part1 input = sum $ mapMaybe (maybePartNumber (lines input)) $ posList (lines input)
+part2 input = sum $ mapMaybe (maybeGearRatio (lines input)) $ posList (lines input)
 
-isPartNumber :: [[Char]] -> (Int, Int) -> Maybe Int
-isPartNumber input p@(x, y)
-  | not $ isDigit (lookupChar input p) = Nothing
-  | isDigit (lookupChar input (x - 1, y)) = Nothing
-  | any scanAround [(input, x', y) | x' <- [x .. x + length number - 1]] = Just $ read $ traceShowId number
+posList :: Grid -> [Pos]
+posList grid = [(x, y) | y <- [0 .. length grid], x <- [0 .. length (head grid)]]
+
+maybePartNumber :: Grid -> Pos -> Maybe Int
+maybePartNumber grid pos@(x, y)
+  | (not . isDigit) (getSym grid pos) || isDigit (getSym grid (x - 1, y)) = Nothing
+  | any isSymbol numNeighbors = number
   | otherwise = Nothing
   where
-    number = takeWhile isDigit $ drop x $ input !! y
+    numNeighbors = map (getSym grid) $ concat [neighbors (x', y) | x' <- [x .. x + len - 1]]
+    number = captureNumber grid pos
+    len = (length . show . fromJust) number
 
-maybeGearRatio :: [[Char]] -> (Int, Int) -> Maybe Int
-maybeGearRatio input p@(x, y)
-  | lookupChar input p /= '*' = Nothing
+maybeGearRatio :: Grid -> Pos -> Maybe Int
+maybeGearRatio grid pos
+  | getSym grid pos /= '*' = Nothing
   | otherwise = calculateGearRatio adjacentNums
   where
-    adjacentNums = traceShowId $ chunksOf 3 [captureNumber input (x', y') | y' <- [y - 1 .. y + 1], x' <- [x - 1 .. x + 1]]
+    adjacentNums = map (captureNumber grid) (neighbors pos)
 
-calculateGearRatio :: [[Maybe Int]] -> Maybe Int
+calculateGearRatio :: [Maybe Int] -> Maybe Int
 calculateGearRatio array
-  | length fixed /= 2 = Nothing
-  | otherwise = Just $ product fixed
+  | length gears /= 2 = Nothing
+  | otherwise = Just $ product gears
   where
-    firstRow = head array
-    lastRow = last array
-    firstRow' = if isJust (firstRow !! 1) then nub firstRow else firstRow
-    lastRow' = if isJust (lastRow !! 1) then nub lastRow else lastRow
-    fixed = catMaybes $ firstRow' ++ array !! 1 ++ lastRow'
+    smartnub r = if isJust (r !! 1) then nub r else r
+    gears = concatMap (catMaybes . smartnub) $ chunksOf 3 array
 
-captureNumber :: [[Char]] -> (Int, Int) -> Maybe Int
+captureNumber :: Grid -> Pos -> Maybe Int
 captureNumber array (x, y)
-  | (not . isDigit) (lookupChar array (x, y)) = Nothing
-  | otherwise = Just $ read $ reverse toLeft ++ toRight
+  | (not . isDigit) (getSym array (x, y)) = Nothing
+  | otherwise = (Just . read) $ reverse toLeft ++ toRight
   where
     toLeft = takeWhile isDigit $ reverse $ take x $ array !! y
     toRight = takeWhile isDigit $ drop x $ array !! y
@@ -48,10 +52,10 @@ captureNumber array (x, y)
 isSymbol :: Char -> Bool
 isSymbol c = not (c == '.' || isDigit c)
 
-lookupChar :: [[Char]] -> (Int, Int) -> Char
-lookupChar input (x, y)
-  | x < 0 || y < 0 || y >= length input || x >= length (head input) = '.'
-  | otherwise = input !! y !! x
+getSym :: Grid -> Pos -> Char
+getSym g (x, y)
+  | x < 0 || y < 0 || y >= length g || x >= length (head g) = '.'
+  | otherwise = g !! y !! x
 
-scanAround :: ([[Char]], Int, Int) -> Bool
-scanAround (input, x, y) = any isSymbol [lookupChar input (x', y') | y' <- [y - 1 .. y + 1], x' <- [x - 1 .. x + 1]]
+neighbors :: Pos -> [Pos]
+neighbors (x, y) = [(x', y') | y' <- [y - 1 .. y + 1], x' <- [x - 1 .. x + 1]]

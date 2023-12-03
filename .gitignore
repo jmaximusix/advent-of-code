@@ -1,3 +1,4 @@
 .env
+debug/
 aoc_cache/
 dist-newstyle/

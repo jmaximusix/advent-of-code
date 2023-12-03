@@ -3,7 +3,7 @@
 module THUtils where
 
 import Language.Haskell.TH.Lib (listE, varE)
-import Language.Haskell.TH.Syntax (Exp, Q, mkName, nameBase)
+import Language.Haskell.TH.Syntax (Exp, Q, mkName)
 
 solutions :: Q Exp
 solutions = listE $ map dayParts [1 .. 25]
