@@ -67,9 +67,9 @@ main = do
             _aYear = 2023,
             _aCache = Just "./aoc_cache",
             _aForce = False,
-            _aThrottle = 3000000
+            _aThrottle = 1000000
           }
-  let day = mkDay_ 3
+  let day = mkDay_ 4
   let part = Part1
 
   -- prompt <- runAoC_ options $ AoCPrompt day
