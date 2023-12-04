@@ -1,7 +1,7 @@
 module Day2 (part1, part2) where
 
 import Data.Bifunctor (bimap)
-import Data.List.Split (chunksOf, splitOn)
+import Data.List.Split (chunksOf)
 import qualified Data.Map as Map (Map, empty, fromList, insertWith, toList, (!))
 import GHC.Utils.Misc (capitalise)
 
@@ -26,6 +26,6 @@ parseInput :: String -> (Int, Map.Map Color Int)
 parseInput input = (game_id, foldl update Map.empty cubes)
   where
     update m (count, color) = Map.insertWith max color count m
-    pairs = map (\[a, b] -> (a, init b)) $ chunksOf 2 $ splitOn " " (input ++ ",")
+    pairs = map (\[a, b] -> (a, init b)) $ chunksOf 2 $ words (input ++ ",")
     cubes = map (bimap read (read . capitalise)) (tail pairs)
     game_id = (read . snd . head) pairs
