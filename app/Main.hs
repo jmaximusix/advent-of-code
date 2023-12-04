@@ -49,7 +49,7 @@ import LoadEnv (loadEnv)
 import System.Environment (getEnv)
 import THUtils (solutions)
 
-getSolution :: Day -> Part -> String -> Int
+getSolution :: Day -> Part -> [String] -> Int
 getSolution day part = case part of
   Part1 -> fst sol
   Part2 -> snd sol
@@ -69,15 +69,15 @@ main = do
             _aForce = False,
             _aThrottle = 1000000
           }
-  let day = mkDay_ 4
+  let day = mkDay_ 2
   let part = Part1
 
   -- prompt <- runAoC_ options $ AoCPrompt day
-  input <- runAoC_ options $ AoCInput day
-  let result = getSolution day part (unpack input)
+  input <- lines . unpack <$> runAoC_ options (AoCInput day)
+  let result = getSolution day part input
   print result
 
-  let result = getSolution day Part2 (unpack input)
+  let result = getSolution day Part2 input
   print result
 
 -- response <- runAoC_ options $ AoCSubmit day part (show result)

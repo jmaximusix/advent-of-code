@@ -7,14 +7,13 @@ import GHC.Utils.Misc (capitalise)
 
 data Color = Red | Green | Blue deriving (Show, Eq, Ord, Read)
 
-part1, part2 :: String -> Int
+part1, part2 :: [String] -> Int
 part1 =
   sum
     . map fst
     . filter (hasMoreCubes (Map.fromList [(Red, 12), (Green, 13), (Blue, 14)]) . snd)
     . map parseInput
-    . lines
-part2 = sum . map (setPower . snd . parseInput) . lines
+part2 = sum . map (setPower . snd . parseInput)
 
 hasMoreCubes :: Map.Map Color Int -> Map.Map Color Int -> Bool
 hasMoreCubes a b = all (\color -> a Map.! color >= b Map.! color) [Red, Green, Blue]

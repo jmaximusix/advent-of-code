@@ -9,9 +9,9 @@ type Grid = [[Char]]
 
 type Pos = (Int, Int)
 
-part1, part2 :: String -> Int
-part1 input = sum $ mapMaybe (maybePartNumber (lines input)) $ posList (lines input)
-part2 input = sum $ mapMaybe (maybeGearRatio (lines input)) $ posList (lines input)
+part1, part2 :: Grid -> Int
+part1 grid = (sum . mapMaybe (maybePartNumber grid) . posList) grid
+part2 grid = (sum . mapMaybe (maybeGearRatio grid) . posList) grid
 
 posList :: Grid -> [Pos]
 posList grid = [(x, y) | y <- [0 .. length grid], x <- [0 .. length (head grid)]]
