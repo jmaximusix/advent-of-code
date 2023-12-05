@@ -6,7 +6,7 @@ import Language.Haskell.TH.Lib (listE, varE)
 import Language.Haskell.TH.Syntax (Exp, Q, mkName)
 
 solutions :: Q Exp
-solutions = listE $ map dayParts [1 .. 25]
+solutions = listE $ map dayParts [1 :: Int .. 25]
   where
     dayParts n =
       [|

@@ -15,10 +15,12 @@ import Advent
     Day,
     Part (Part1, Part2),
     dayInt,
-    mkDay_,
     runAoC_,
     showSubmitRes,
   )
+import Clap (Submit (Ask, Direct, No), parseClap)
+import qualified Data.Map as Map (keys)
+import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (unpack)
 import qualified Day1
 import qualified Day10
@@ -47,38 +49,64 @@ import qualified Day8
 import qualified Day9
 import LoadEnv (loadEnv)
 import System.Environment (getEnv)
+import System.IO (hFlush, stdout)
 import THUtils (solutions)
-
-getSolution :: Day -> Part -> [String] -> Int
-getSolution day part = case part of
-  Part1 -> fst sol
-  Part2 -> snd sol
-  where
-    sol = $(solutions) !! (fromIntegral (dayInt day) - 1)
+import Text.Printf (printf)
 
 main :: IO ()
 main = do
-  putStrLn "--- Advent of Code ---"
   loadEnv
   session_key <- getEnv "AOC_SESSION_KEY"
+  cache_dir <- getEnv "AOC_CACHE_DIR"
+
+  (day, part', year, submit, test) <- parseClap
+
   let options =
         AoCOpts
           { _aSessionKey = session_key,
-            _aYear = 2023,
-            _aCache = Just "./aoc_cache",
+            _aYear = year,
+            _aCache = Just cache_dir,
             _aForce = False,
             _aThrottle = 1000000
           }
-  let day = mkDay_ 2
-  let part = Part1
 
-  -- prompt <- runAoC_ options $ AoCPrompt day
-  input <- lines . unpack <$> runAoC_ options (AoCInput day)
-  let result = getSolution day part input
-  print result
+  prompt <- runAoC_ options $ AoCPrompt day
+  let part = fromMaybe (last $ Map.keys prompt) part'
+  let l = '\n' : (concat (replicate 13 "*✻") ++ "\n")
+  printf "%sAdvent of Code %d Day %d%s\n" l year (dayInt day) l
+  input <-
+    if test
+      then do lines <$> readFile (printf "%stest/%d/test%d.txt" cache_dir year (dayInt day))
+      else do lines . unpack <$> runAoC_ options (AoCInput day)
+  result <-
+    if submit == No && isNothing part'
+      then do return $ unlines $ map (\x -> printf "%s:\t%d" (show x) (getSolution day input x)) [Part1, Part2]
+      else do (return . show . getSolution day input) part
+  putStrLn result
+  submit' <-
+    if submit == Ask
+      then do askAnswer
+      else do return submit
+  case submit' of
+    Direct -> do
+      response <- runAoC_ options $ AoCSubmit day part result
+      print $ showSubmitRes (snd response)
+    _ -> do return ()
 
-  let result = getSolution day Part2 input
-  print result
+askAnswer :: IO Submit
+askAnswer = do
+  putStr "\nSubmit this solution? [y/N]: "
+  hFlush stdout
+  response <- getLine
+  let sub' = case response of
+        "y" -> Direct
+        "Y" -> Direct
+        _ -> No
+  return sub'
 
--- response <- runAoC_ options $ AoCSubmit day part (show result)
--- print $ showSubmitRes (snd response)
+getSolution :: Day -> [String] -> Part -> Int
+getSolution day input part = case part of
+  Part1 -> fst sol input
+  Part2 -> snd sol input
+  where
+    sol = $(solutions) !! (fromIntegral (dayInt day) - 1)
