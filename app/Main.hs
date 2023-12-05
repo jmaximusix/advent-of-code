@@ -81,12 +81,12 @@ main = do
   result <-
     if submit == No && isNothing part'
       then do
-        printf "Part 1: %d\n" (getSolution day input Part1)
-        printf "Part 2: %d\n" (getSolution day input Part2)
+        printf "Part1: %d\n" (getSolution day input Part1)
+        printf "Part2: %d\n" (getSolution day input Part2)
         return 0
       else do
         let result = getSolution day input part
-        printf "Part %s: %d\n" (show part) result
+        printf "%s: %d\n" (show part) result
         return result
   submit' <-
     if submit == Ask
@@ -94,7 +94,7 @@ main = do
       else do return submit
   case submit' of
     Direct -> do
-      print "Submitting...\n"
+      putStrLn "Submitting...\n"
       response <- runAoC_ options $ AoCSubmit day part (show result)
       putStrLn $ showSubmitRes (snd response)
     _ -> do return ()
