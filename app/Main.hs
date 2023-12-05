@@ -72,7 +72,7 @@ main = do
 
   prompt <- runAoC_ options $ AoCPrompt day
   let part = fromMaybe (last $ Map.keys prompt) part'
-  let l = '\n' : (concat (replicate 13 "*✻") ++ "\n")
+  let l = '\n' : (concat (replicate 13 "✻*") ++ "\n")
   printf "%sAdvent of Code %d Day %d%s\n" l year (dayInt day) l
   input <-
     if test
@@ -80,17 +80,23 @@ main = do
       else do lines . unpack <$> runAoC_ options (AoCInput day)
   result <-
     if submit == No && isNothing part'
-      then do return $ unlines $ map (\x -> printf "%s:\t%d" (show x) (getSolution day input x)) [Part1, Part2]
-      else do (return . show . getSolution day input) part
-  putStrLn result
+      then do
+        printf "Part 1: %d\n" (getSolution day input Part1)
+        printf "Part 2: %d\n" (getSolution day input Part2)
+        return 0
+      else do
+        let result = getSolution day input part
+        printf "Part %s: %d\n" (show part) result
+        return result
   submit' <-
     if submit == Ask
       then do askAnswer
       else do return submit
   case submit' of
     Direct -> do
-      response <- runAoC_ options $ AoCSubmit day part result
-      print $ showSubmitRes (snd response)
+      print "Submitting...\n"
+      response <- runAoC_ options $ AoCSubmit day part (show result)
+      putStrLn $ showSubmitRes (snd response)
     _ -> do return ()
 
 askAnswer :: IO Submit
