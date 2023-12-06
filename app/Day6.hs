@@ -1,6 +1,8 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Day6 (part1, part2) where
 
-import Data.Tuple.Extra (both)
+import Data.Tuple.Extra (both, first)
 
 part1, part2 :: [String] -> Int
 part1 = product . map calcRace . parseInput
@@ -12,7 +14,7 @@ parseInput input = zip time dist
     [time, dist] = map (map read . tail . words) input
 
 calcRace :: (Int, Int) -> Int
-calcRace (time, dist) = (\(a, b) -> ceiling b - floor a - 1) $ pqFormula (-fromIntegral time :: Double) (fromIntegral dist)
+calcRace = (\(a, b) -> ceiling @Double b - floor a - 1) . uncurry pqFormula . first (* (-1)) . both fromIntegral
 
 pqFormula :: (Floating a) => a -> a -> (a, a)
 pqFormula p q = (p' - sqrt q', p' + sqrt q')
