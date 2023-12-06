@@ -11,7 +11,8 @@ import Text.Printf (printf)
 solutionsTemplate :: Q Exp
 solutionsTemplate = do
   let name = printf "Day%d.part%d"
-  let lookupDay n = liftM2 (liftM2 (\a b -> (n, (a, b)))) (lookupValueName (name n (1 :: Int))) (lookupValueName (name n 2))
+  let names n = both (lookupValueName . name n) (1 :: Integer, 2)
+  let lookupDay n = uncurry (liftM2 $ liftM2 (\a b -> (n, (a, b)))) $ names n
   let tuptup (a, b) = tupE [a, b]
-  exist <- mapMaybeM lookupDay [1 :: Integer .. 25]
+  exist <- mapMaybeM lookupDay [1 .. 25]
   listE $ map (tuptup . bimap (litE . integerL) (tuptup . both varE)) exist
