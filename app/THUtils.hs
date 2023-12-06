@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module THUtils (solutionsTemplate) where
 
 import Control.Monad (liftM2)
@@ -11,8 +13,8 @@ import Text.Printf (printf)
 solutionsTemplate :: Q Exp
 solutionsTemplate = do
   let name = printf "Day%d.part%d"
-  let names n = both (lookupValueName . name n) (1 :: Integer, 2)
-  let lookupDay n = uncurry (liftM2 $ liftM2 (\a b -> (n, (a, b)))) $ names n
+  let names day = both (lookupValueName . name day) (1 :: Integer, 2)
+  let lookupDay d = uncurry (liftM2 (liftM2 (curry (d,)))) $ names d
   let tuptup (a, b) = tupE [a, b]
   exist <- mapMaybeM lookupDay [1 .. 25]
   listE $ map (tuptup . bimap (litE . integerL) (tuptup . both varE)) exist
