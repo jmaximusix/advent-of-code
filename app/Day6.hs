@@ -12,4 +12,10 @@ parseInput input = zip time dist
     [time, dist] = map (map read . tail . words) input
 
 calcRace :: (Int, Int) -> Int
-calcRace (time, dist) = length $ filter (> dist) $ map (\t -> t * (time - t)) [0 .. time]
+calcRace (time, dist) = (\(a, b) -> ceiling b - floor a - 1) $ pqFormula (-fromIntegral time :: Double) (fromIntegral dist)
+
+pqFormula :: (Floating a) => a -> a -> (a, a)
+pqFormula p q = (p' - sqrt q', p' + sqrt q')
+  where
+    p' = -p / 2
+    q' = p' * p' - q
