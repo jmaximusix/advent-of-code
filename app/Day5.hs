@@ -1,22 +1,29 @@
 module Day5 (part1, part2) where
 
-import Data.List.Extra (chunksOf)
+import Data.Bifunctor (bimap, first)
+import Data.List.Extra (chunksOf, uncons)
 import Data.List.Split (splitOn)
+import Data.Maybe (fromJust)
 
 type Range = (Int, Int)
 
 part1, part2 :: [String] -> Int
-part1 input = minimum $ foldl applyOneMap (seeds1 input) $ parseInput input
-part2 input = minimum $ map fst $ foldl applyOneMap2 (seeds2 input) $ parseInput input
+part1 = minimum . uncurry (foldl applyOneMap) . parseInput
+part2 =
+  minimum
+    . map fst
+    . uncurry (foldl applyOneMap2)
+    . first (map (\[a, b] -> (a, b)) . chunksOf 2)
+    . parseInput
 
-parseInput :: [String] -> [[[Int]]]
-parseInput input = map (map (map (\x -> read x :: Int) . words) . tail . lines) $ splitOn "\n\n" (unlines $ tail input)
-
-seeds1 :: [String] -> [Int]
-seeds1 = map read . tail . words . head
-
-seeds2 :: [String] -> [Range]
-seeds2 input = map (\[a, b] -> (a, b)) $ chunksOf 2 $ seeds1 input
+parseInput :: [String] -> ([Int], [[[Int]]])
+parseInput =
+  bimap
+    (map read . tail . words . head)
+    (map (map (map (\x -> read x :: Int) . words) . tail))
+    . fromJust
+    . uncons
+    . splitOn [[]]
 
 applyOneMap :: [Int] -> [[Int]] -> [Int]
 applyOneMap seeds rangeMap = map (applyToSeed rangeMap) seeds
