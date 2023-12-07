@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 
-module Day6 (part1, part2) where
+module Year2023.Day6 (part1, part2) where
 
 import Data.Tuple.Extra (both, first)
 

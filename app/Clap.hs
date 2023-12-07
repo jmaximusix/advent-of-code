@@ -4,7 +4,7 @@ import Advent (Day, Part, dayInt, mkDay_)
 import qualified Control.Monad (when)
 import Data.Char (toLower)
 import GHC.Utils.Misc (capitalise)
-import MyLib (mostRecentChallenge, readPart)
+import MyLib (Date, mostRecentChallenge, readPart)
 import Options.Applicative
   ( Parser,
     auto,
@@ -31,7 +31,7 @@ data Submit = Direct | Ask | No deriving (Show, Read, Eq)
 
 data Clap = Clap Day (Maybe Part) Integer Submit Bool
 
-parseClap :: IO (Day, Maybe Part, Integer, Submit, Bool)
+parseClap :: IO (Date, Maybe Part, Submit, Bool)
 parseClap = do
   recent <- mostRecentChallenge
   Clap day part year submit test <-
@@ -43,10 +43,10 @@ parseClap = do
   Control.Monad.when (submit /= No && test) $ do
     putStrLn "Cannot submit a solution using a test input.\nPlease adjust command line options."
     exitFailure
-  return (day, part, year, submit, test)
+  return ((day, year), part, submit, test)
 
-clapOptions :: (Integer, Day) -> Parser Clap
-clapOptions (recentYear, recentDay) =
+clapOptions :: Date -> Parser Clap
+clapOptions (recentDay, recentYear) =
   Clap
     <$> ( mkDay_
             <$> option

@@ -41,7 +41,33 @@ executable advent-of-code2023
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:    THUtils, Clap, Day1, Day2, Day3, Day4, Day5, Day6, Day7, Day8, Day9, Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19, Day20, Day21, Day22, Day23, Day24, Day25
+    other-modules:    Year2023, THUtils, Clap,
+        Year2023,
+        Year2023.Day1
+        Year2023.Day2
+        Year2023.Day3
+        Year2023.Day4
+        Year2023.Day5
+        Year2023.Day6
+        Year2023.Day7
+        Year2023.Day8
+        Year2023.Day9
+        Year2023.Day10
+        Year2023.Day11
+        Year2023.Day12
+        Year2023.Day13
+        Year2023.Day14
+        Year2023.Day15
+        Year2023.Day16
+        Year2023.Day17
+        Year2023.Day18
+        Year2023.Day19
+        Year2023.Day20
+        Year2023.Day21
+        Year2023.Day22
+        Year2023.Day23
+        Year2023.Day24
+        Year2023.Day25
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
@@ -57,6 +83,6 @@ executable advent-of-code2023
         extra,
         text
 
-    hs-source-dirs:   app
+    hs-source-dirs:   app, app/Year2023
     default-language: Haskell2010
     ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns

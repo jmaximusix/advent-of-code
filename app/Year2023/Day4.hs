@@ -1,6 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 
-module Day4 (part1, part2) where
+module Year2023.Day4 (part1, part2) where
 
 import Data.List.Extra (splitOn)
 import qualified Data.Set as Set (fromList, intersection)

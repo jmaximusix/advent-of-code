@@ -23,44 +23,44 @@ import Data.Char (toLower)
 import qualified Data.Map as Map (keys)
 import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (unpack)
-import qualified Day1
-import qualified Day10
-import qualified Day11
-import qualified Day12
-import qualified Day13
-import qualified Day14
-import qualified Day15
-import qualified Day16
-import qualified Day17
-import qualified Day18
-import qualified Day19
-import qualified Day2
-import qualified Day20
-import qualified Day21
-import qualified Day22
-import qualified Day23
-import qualified Day24
-import qualified Day25
-import qualified Day3
-import qualified Day4
-import qualified Day5
-import qualified Day6
-import qualified Day7
-import qualified Day8
-import qualified Day9
 import LoadEnv (loadEnv)
+import MyLib (Date)
 import System.Environment (getEnv)
 import System.IO (hFlush, stdout)
 import THUtils (solutionsTemplate)
 import Text.Printf (printf)
+import qualified Year2023.Day1
+import qualified Year2023.Day10
+import qualified Year2023.Day11
+import qualified Year2023.Day12
+import qualified Year2023.Day13
+import qualified Year2023.Day14
+import qualified Year2023.Day15
+import qualified Year2023.Day16
+import qualified Year2023.Day17
+import qualified Year2023.Day18
+import qualified Year2023.Day19
+import qualified Year2023.Day2
+import qualified Year2023.Day20
+import qualified Year2023.Day21
+import qualified Year2023.Day22
+import qualified Year2023.Day23
+import qualified Year2023.Day24
+import qualified Year2023.Day25
+import qualified Year2023.Day3
+import qualified Year2023.Day4
+import qualified Year2023.Day5
+import qualified Year2023.Day6
+import qualified Year2023.Day7
+import qualified Year2023.Day8
+import qualified Year2023.Day9
 
 main :: IO ()
 main = do
   loadEnv
   cache_dir <- getEnv "AOC_CACHE_DIR"
   sessionKey <- getEnv "AOC_SESSION_KEY"
-  (day, part', year, submit, test) <- parseClap
-
+  (date@(day, year), part', submit, test) <- parseClap
   let options =
         AoCOpts
           { _aSessionKey = sessionKey,
@@ -72,16 +72,16 @@ main = do
 
   let l = '\n' : (concat (replicate 13 "✻*") ++ "\n")
   printf "%sAdvent of Code %d Day %d%s\n" l year (dayInt day) l
-  input <- getInput (day, year) cache_dir options test
+  input <- getInput date cache_dir options test
   if submit == No && isNothing part'
     then do
-      mapM_ (getResult day input) [Part1, Part2]
+      mapM_ (getResult date input) [Part1, Part2]
     else do
       prompt <- runAoC_ options $ AoCPrompt day
       let part = fromMaybe (last $ Map.keys prompt) part'
-      submitResult submit options day part =<< getResult day input part
+      submitResult submit options day part =<< getResult date input part
 
-getInput :: (Day, Integer) -> String -> AoCOpts -> Bool -> IO [String]
+getInput :: Date -> String -> AoCOpts -> Bool -> IO [String]
 getInput (day, year) cache _ True = do lines <$> readFile (printf "%stest/%d/test%d.txt" cache year (dayInt day))
 getInput (day, _) _ options False = do lines . unpack <$> runAoC_ options (AoCInput day)
 
@@ -105,8 +105,8 @@ askAnswer = do
         _ -> No
   return sub'
 
-getResult :: Day -> [String] -> Part -> IO Int
-getResult day input part = do
+getResult :: Date -> [String] -> Part -> IO Int
+getResult (day, _) input part = do
   let mbSolution = lookup (dayInt day) $(solutionsTemplate)
   let (p1, p2) = fromMaybe (error "Solution not defined") mbSolution
   result <- do

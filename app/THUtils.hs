@@ -12,7 +12,7 @@ import Text.Printf (printf)
 
 solutionsTemplate :: Q Exp
 solutionsTemplate = do
-  let name = printf "Day%d.part%d"
+  let name = printf "Year2023.Day%d.part%d"
   let names day = both (lookupValueName . name day) (1 :: Integer, 2)
   let lookupDay d = uncurry (liftM2 (liftM2 (curry (d,)))) $ names d
   let tuptup (a, b) = tupE [a, b]

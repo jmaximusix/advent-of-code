@@ -1,4 +1,4 @@
-module MyLib (mostRecentChallenge, readPart) where
+module MyLib (mostRecentChallenge, readPart, Date) where
 
 import Advent (Day, Part (Part1, Part2), mkDay_)
 import Data.Maybe (fromJust)
@@ -11,14 +11,16 @@ import Data.Time.LocalTime
   )
 import Debug.Trace (trace)
 
-mostRecentChallenge :: IO (Integer, Day)
+type Date = (Day, Integer)
+
+mostRecentChallenge :: IO Date
 mostRecentChallenge = do
   now <- getCurrentTime
   let localTime = utcToLocalTime (hoursToTimeZone (-5)) now
   let (year, month, day) = toGregorian $ localDay localTime
   let year' = if month /= 12 then year - 1 else year
   let day' = if month /= 12 || day > 25 then 25 else fromIntegral day
-  return (year', mkDay_ day')
+  return (mkDay_ day', year')
 
 readPart :: String -> Part
 readPart "1" = Part1
