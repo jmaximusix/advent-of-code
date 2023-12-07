@@ -15,7 +15,12 @@ part1 = solve Part1
 part2 = solve Part2
 
 solve :: Part -> [String] -> Int
-solve part = sum . zipWith (*) [1 ..] . map snd . sortBy (\(a, _) (b, _) -> compareHands a b) . map (parseInput part)
+solve part =
+  sum
+    . zipWith (*) [1 ..]
+    . map snd
+    . sortBy (\(a, _) (b, _) -> compareHands a b)
+    . map (parseInput part)
 
 parseInput :: Part -> String -> ([Card], Int)
 parseInput part input = bimap (map readCard . maybeReplace) read (hand, bid)
