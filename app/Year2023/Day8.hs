@@ -30,8 +30,5 @@ parseNode node = (name, (left, right))
     [left, right] = (splitOn ", " . init . tail) adjacent
 
 doStep :: Nodes -> String -> Instruction -> String
-doStep nodes current inst = case inst of
-  L -> left
-  R -> right
-  where
-    (left, right) = nodes Map.! current
+doStep nodes current L = fst $ nodes Map.! current
+doStep nodes current R = snd $ nodes Map.! current
