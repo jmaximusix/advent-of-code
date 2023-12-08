@@ -3,7 +3,7 @@ module Year2023.Day7 (part1, part2) where
 import Advent (Part (Part1, Part2))
 import Data.Bifunctor (bimap)
 import Data.List (sort, sortBy)
-import Data.List.Extra (group, replace)
+import Data.List.Extra (group)
 import Data.Ord (Down (Down), comparing)
 
 data Card = Joker | Number Int | Jack | Queen | King | Ace deriving (Eq, Show, Ord)
@@ -23,22 +23,20 @@ solve part =
     . map (parseInput part)
 
 parseInput :: Part -> String -> ([Card], Int)
-parseInput part input = bimap (map readCard . maybeReplace) read (hand, bid)
+parseInput part input = bimap (map (readCard part)) read (hand, bid)
   where
-    maybeReplace
-      | part == Part1 = id
-      | otherwise = replace "J" "*"
     [hand, bid] = words input
 
-readCard :: Char -> Card
-readCard 'A' = Ace
-readCard 'K' = King
-readCard 'Q' = Queen
-readCard 'J' = Jack
-readCard '*' = Joker
-readCard 'T' = Number 10
-readCard x | x `elem` ['2' .. '9'] = Number (read [x])
-readCard c = error $ "Cant read invalid card: " ++ [c]
+readCard :: Part -> Char -> Card
+readCard _ 'A' = Ace
+readCard _ 'K' = King
+readCard _ 'Q' = Queen
+readCard p 'J' = case p of
+  Part1 -> Jack
+  Part2 -> Joker
+readCard _ 'T' = Number 10
+readCard _ x | x `elem` ['2' .. '9'] = Number (read [x])
+readCard _ c = error $ "Cant read invalid card: " ++ [c]
 
 compareHands :: [Card] -> [Card] -> Ordering
 compareHands hand1 hand2
@@ -64,6 +62,5 @@ mostCommonCards cards
   | jokers == first && jokers > second = (second + jokers, second)
   | otherwise = (first + jokers, second)
   where
-    (first : second') = sortBy (comparing Down) (map length (group $ sort cards))
-    second = if null second' then 0 else head second'
+    (first : second : _) = sortBy (comparing Down) (map length (group $ sort cards) ++ [0])
     jokers = length $ filter (== Joker) cards
