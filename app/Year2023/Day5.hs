@@ -44,14 +44,14 @@ applyToSeed2 ([dest, source, len] : xs) range = inside' ++ concatMap (applyToSee
     (inside, outside) = range `intersect` (source, len)
     inside' = map (\(a, b) -> (dest + a - source, b)) inside
 
--- a is the range that gets split on b, seperated in inside and outside
+-- a is the range that gets split on b, seperated in (inside, outside)
 intersect :: Range -> Range -> ([Range], [Range])
-intersect (a1, l1) (b1, l2)
-  | a1 >= b1 && a2 <= b2 = ([(a1, l1)], [])
-  | a1 < b1 && a2 > b2 = ([(b1, l2)], [(a1, b1 - a1), (b2, a2 - b2)])
+intersect a@(a1, l1) b@(b1, l2)
+  | a1 >= b1 && a2 <= b2 = ([a], [])
+  | a1 < b1 && a2 > b2 = ([b], [(a1, b1 - a1), (b2, a2 - b2)])
   | a1 < b2 && a2 > b2 = ([(a1, b2 - a1)], [(b2, a2 - b2)])
   | a1 < b1 && a2 > b1 = ([(b1, a2 - b1)], [(a1, b1 - a1)])
-  | otherwise = ([], [(a1, l1)])
+  | otherwise = ([], [a])
   where
     a2 = a1 + l1
     b2 = b1 + l2

@@ -2,6 +2,7 @@ module Year2023.Day7 (part1, part2) where
 
 import Advent (Part (Part1, Part2))
 import Data.Bifunctor (bimap)
+import Data.Function (on)
 import Data.List (group, sort, sortBy)
 import Data.Ord (Down (Down), comparing)
 
@@ -18,7 +19,7 @@ solve part =
   sum
     . zipWith (*) [1 ..]
     . map snd
-    . sortBy (\(a, _) (b, _) -> compareHands a b)
+    . sortBy (compareHands `on` fst)
     . map (parseInput part)
 
 parseInput :: Part -> String -> ([Card], Int)
@@ -39,7 +40,7 @@ readCard _ c = error $ "Cant read invalid card: " ++ [c]
 
 compareHands :: [Card] -> [Card] -> Ordering
 compareHands hand1 hand2
-  | ht1 == ht2 = (head . dropWhile (== EQ) . zipWith compare hand1) hand2
+  | ht1 == ht2 = head $ dropWhile (== EQ) $ zipWith compare hand1 hand2
   | otherwise = compare ht1 ht2
   where
     [ht1, ht2] = map handType [hand1, hand2]
