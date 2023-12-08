@@ -2,8 +2,7 @@ module Year2023.Day7 (part1, part2) where
 
 import Advent (Part (Part1, Part2))
 import Data.Bifunctor (bimap)
-import Data.List (sort, sortBy)
-import Data.List.Extra (group)
+import Data.List (group, sort, sortBy)
 import Data.Ord (Down (Down), comparing)
 
 data Card = Joker | Number Int | Jack | Queen | King | Ace deriving (Eq, Show, Ord)
@@ -59,7 +58,7 @@ handType cards
 
 mostCommonCards :: [Card] -> (Int, Int)
 mostCommonCards cards
-  | jokers == first && jokers > second = (second + jokers, second)
+  | jokers > second = (second + jokers, second)
   | otherwise = (first + jokers, second)
   where
     (first : second : _) = sortBy (comparing Down) (map length (group $ sort cards) ++ [0])

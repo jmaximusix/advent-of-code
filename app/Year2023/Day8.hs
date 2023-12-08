@@ -28,6 +28,12 @@ parseInput :: [String] -> ([Instruction], Nodes)
 parseInput =
   bimap
     (cycle . map (read . (: [])))
-    (Map.fromList . map (second (fromJust . stripInfix ", " . init . tail) . (fromJust . stripInfix " = ")) . tail)
+    ( Map.fromList
+        . map
+          ( second (fromJust . stripInfix ", " . init . tail)
+              . (fromJust . stripInfix " = ")
+          )
+        . tail
+    )
     . fromJust
     . uncons
