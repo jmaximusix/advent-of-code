@@ -1,8 +1,8 @@
 module Year2023.Day8 (part1, part2) where
 
-import Data.Bifunctor (bimap)
+import Data.Bifunctor (bimap, second)
 import Data.List (findIndex, uncons)
-import Data.List.Extra (splitOn)
+import Data.List.Extra (stripInfix)
 import qualified Data.Map as Map (Map, fromList, keys, (!))
 import Data.Maybe (fromJust)
 
@@ -20,15 +20,14 @@ part2 input = foldl1 lcm $ map (findLen ((== 'Z') . last) parsed) endingInA
 findLen :: (String -> Bool) -> ([Instruction], Nodes) -> String -> Int
 findLen stopc (insts, nodes) start = fromJust $ findIndex stopc $ scanl (doStep nodes) start insts
 
-parseInput :: [String] -> ([Instruction], Nodes)
-parseInput = bimap (cycle . map (read . (: []))) (Map.fromList . map parseNode . tail) . fromJust . uncons
-
-parseNode :: String -> (String, (String, String))
-parseNode node = (name, (left, right))
-  where
-    [name, adjacent] = splitOn " = " node
-    [left, right] = (splitOn ", " . init . tail) adjacent
-
 doStep :: Nodes -> String -> Instruction -> String
 doStep nodes current L = fst $ nodes Map.! current
 doStep nodes current R = snd $ nodes Map.! current
+
+parseInput :: [String] -> ([Instruction], Nodes)
+parseInput =
+  bimap
+    (cycle . map (read . (: [])))
+    (Map.fromList . map (second (fromJust . stripInfix ", " . init . tail) . (fromJust . stripInfix " = ")) . tail)
+    . fromJust
+    . uncons
