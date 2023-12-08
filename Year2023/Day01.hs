@@ -1,4 +1,4 @@
-module Year2023.Day1 (part1, part2) where
+module Day01 (part1, part2) where
 
 import Advent (Part (Part1, Part2))
 import Data.Char (digitToInt, isDigit)

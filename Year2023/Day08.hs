@@ -1,4 +1,4 @@
-module Year2023.Day8 (part1, part2) where
+module Day08 (part1, part2) where
 
 import Data.Bifunctor (bimap, second)
 import Data.List (findIndex, uncons)
@@ -27,7 +27,7 @@ doStep nodes current R = snd $ nodes Map.! current
 parseInput :: [String] -> ([Instruction], Nodes)
 parseInput =
   bimap
-    (cycle . map (read . (: [])))
+    (cycle . map (read . pure))
     ( Map.fromList
         . map
           ( second (fromJust . stripInfix ", " . init . tail)

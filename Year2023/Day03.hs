@@ -1,4 +1,4 @@
-module Year2023.Day3 (part1, part2) where
+module Day03 (part1, part2) where
 
 import Data.Char (isDigit)
 import Data.List (nub)

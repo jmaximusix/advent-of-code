@@ -1,4 +1,4 @@
-module Year2023.Day2 (part1, part2) where
+module Day02 (part1, part2) where
 
 import Data.Bifunctor (bimap)
 import Data.List.Split (chunksOf)

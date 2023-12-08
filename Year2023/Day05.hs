@@ -1,4 +1,4 @@
-module Year2023.Day5 (part1, part2) where
+module Day05 (part1, part2) where
 
 import Data.Bifunctor (bimap, first)
 import Data.List.Extra (chunksOf, uncons)

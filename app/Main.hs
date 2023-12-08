@@ -27,33 +27,9 @@ import LoadEnv (loadEnv)
 import MyLib (Date)
 import System.Environment (getEnv)
 import System.IO (hFlush, stdout)
-import THUtils (solutionsTemplate)
+import TemplateHS (solutionsForYear)
 import Text.Printf (printf)
-import qualified Year2023.Day1
-import qualified Year2023.Day10
-import qualified Year2023.Day11
-import qualified Year2023.Day12
-import qualified Year2023.Day13
-import qualified Year2023.Day14
-import qualified Year2023.Day15
-import qualified Year2023.Day16
-import qualified Year2023.Day17
-import qualified Year2023.Day18
-import qualified Year2023.Day19
-import qualified Year2023.Day2
-import qualified Year2023.Day20
-import qualified Year2023.Day21
-import qualified Year2023.Day22
-import qualified Year2023.Day23
-import qualified Year2023.Day24
-import qualified Year2023.Day25
-import qualified Year2023.Day3
-import qualified Year2023.Day4
-import qualified Year2023.Day5
-import qualified Year2023.Day6
-import qualified Year2023.Day7
-import qualified Year2023.Day8
-import qualified Year2023.Day9
+import qualified Year2023
 
 main :: IO ()
 main = do
@@ -69,7 +45,6 @@ main = do
             _aForce = False,
             _aThrottle = 1000000
           }
-
   let l = '\n' : (concat (replicate 13 "✻*") ++ "\n")
   printf "%sAdvent of Code %d Day %d%s\n" l year (dayInt day) l
   input <- getInput date cache_dir options test
@@ -82,8 +57,8 @@ main = do
       submitResult submit options day part =<< getResult date input part
 
 getInput :: Date -> String -> AoCOpts -> Bool -> IO [String]
-getInput (day, year) cache _ True = do lines <$> readFile (printf "%stest/%d/test%d.txt" cache year (dayInt day))
-getInput (day, _) _ options False = do lines . unpack <$> runAoC_ options (AoCInput day)
+getInput (day, year) cache _ True = lines <$> readFile (printf "%stest/%d/test%d.txt" cache year (dayInt day))
+getInput (day, _) _ options False = lines . unpack <$> runAoC_ options (AoCInput day)
 
 submitResult :: Submit -> AoCOpts -> Day -> Part -> Int -> IO ()
 submitResult No _ _ _ _ = do return ()
@@ -100,18 +75,16 @@ askAnswer = do
   putStr "\nSubmit this solution? [y/N]: "
   hFlush stdout
   response <- toLower . head <$> getLine
-  let sub' = case response of
-        'y' -> Direct
-        _ -> No
-  return sub'
+  case response of
+    'y' -> return Direct
+    _ -> return No
 
 getResult :: Date -> [String] -> Part -> IO Int
-getResult (day, _) input part = do
-  let mbSolution = lookup (dayInt day) $(solutionsTemplate)
-  let (p1, p2) = fromMaybe (error "Solution not defined") mbSolution
-  result <- do
-    case part of
-      Part1 -> return $ p1 input
-      Part2 -> return $ p2 input
+getResult (day, year) input part = do
+  let solutions = fromMaybe (error "No solutions for year") $ lookup year $(solutionsForYear)
+  let (p1, p2) = fromMaybe (error "Solution not defined") $ lookup (dayInt day) solutions
+  let result = case part of
+        Part1 -> p1 input :: Int
+        Part2 -> p2 input
   putStrLn $ printf "%s: %d" (show part) result
   return result

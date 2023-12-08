@@ -1,4 +1,4 @@
-module Year2023.Day11 (part1, part2) where
+module Day24 (part1, part2) where
 
 part1, part2 :: [String] -> Int
 part1 = undefined

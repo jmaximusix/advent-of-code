@@ -1,4 +1,4 @@
-module Year2023.Day7 (part1, part2) where
+module Day07 (part1, part2) where
 
 import Advent (Part (Part1, Part2))
 import Data.Bifunctor (bimap)

@@ -1,4 +1,4 @@
-module MyLib (mostRecentChallenge, readPart, Date) where
+module MyLib (mostRecentChallenge, readPart, Date, Solutions) where
 
 import Advent (Day, Part (Part1, Part2), mkDay_)
 import Data.Maybe (fromJust)
@@ -10,6 +10,8 @@ import Data.Time.LocalTime
     utcToLocalTime,
   )
 import Debug.Trace (trace)
+
+type Solutions = [(Integer, ([String] -> Int, [String] -> Int))]
 
 type Date = (Day, Integer)
 
