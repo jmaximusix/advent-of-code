@@ -1,7 +1,6 @@
-module MyLib (mostRecentChallenge, readPart, Date, Solutions) where
+module MyLib (mostRecentChallenge, readPart, Date, replace, replace2d) where
 
 import Advent (Day, Part (Part1, Part2), mkDay_)
-import Data.Maybe (fromJust)
 import Data.Time.Calendar (toGregorian)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.LocalTime
@@ -9,9 +8,6 @@ import Data.Time.LocalTime
     hoursToTimeZone,
     utcToLocalTime,
   )
-import Debug.Trace (trace)
-
-type Solutions = [(Integer, ([String] -> Int, [String] -> Int))]
 
 type Date = (Day, Integer)
 
@@ -30,3 +26,9 @@ readPart "2" = Part2
 readPart "a" = Part1
 readPart "b" = Part2
 readPart _ = error "Invalid part. Use 1, 2, a, or b."
+
+replace2d :: (Int, Int) -> a -> [[a]] -> [[a]]
+replace2d (x, y) new grid = replace x (replace y new (grid !! x)) grid
+
+replace :: Int -> a -> [a] -> [a]
+replace i new list = take i list ++ [new] ++ drop (i + 1) list

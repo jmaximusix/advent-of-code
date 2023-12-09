@@ -2,7 +2,7 @@ module Day03 (part1, part2) where
 
 import Data.Char (isDigit)
 import Data.List (nub)
-import Data.List.Split (chunksOf)
+import Data.List.Extra (chunksOf)
 import Data.Maybe (catMaybes, fromJust, isJust, mapMaybe)
 
 type Grid = [[Char]]

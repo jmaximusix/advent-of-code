@@ -1,15 +1,18 @@
+{-# LANGUAGE TemplateHaskellQuotes #-}
 {-# LANGUAGE TupleSections #-}
 
-module TemplateHS (solutionsTemplate, solutionsForYear) where
+module TemplateHS (solutionsTemplate, solutionsForYear, Solutions) where
 
 import Control.Monad (liftM2)
 import Control.Monad.Extra (mapMaybeM)
 import Data.Bifunctor (bimap)
 import Data.Tuple.Extra (both)
-import Debug.Trace (traceShowId)
-import Language.Haskell.TH.Lib (integerL, listE, litE, tupE, varE)
+import Formatting (build, formatToString)
+import Language.Haskell.TH.Lib (appE, integerL, listE, litE, tupE, varE)
 import Language.Haskell.TH.Syntax (Exp, Q, lookupValueName)
 import Text.Printf (printf)
+
+type Solutions = [(Integer, ([String] -> String, [String] -> String))]
 
 solutionsTemplate :: Q Exp
 solutionsTemplate = do
@@ -18,7 +21,8 @@ solutionsTemplate = do
   let lookupDay d = uncurry (liftM2 (liftM2 (curry (d,)))) $ names d
   let tuptup (a, b) = tupE [a, b]
   exist <- mapMaybeM lookupDay [1 .. 25]
-  listE $ map (tuptup . bimap (litE . integerL) (tuptup . both varE)) exist
+  let toString = appE [|(.) (formatToString build)|]
+  listE $ map (tuptup . bimap (litE . integerL) (tuptup . both (toString . varE))) exist
 
 solutionsForYear :: Q Exp
 solutionsForYear = do

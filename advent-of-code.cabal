@@ -23,6 +23,23 @@ extra-source-files:
     CHANGELOG.md
     README.md
 
+library Year2022
+    exposed-modules: Year2022
+
+    other-modules: Day01, Day02, Day03, Day04, Day05, Day06
+    hs-source-dirs: Year2022
+    default-language: Haskell2010
+    build-depends: base ^>=4.16.4.0,
+        MyLib,
+        advent-of-code-api,
+        template-haskell,
+        extra,
+        containers,
+        linear,
+        ilist,
+        split
+    
+    ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
 
 library Year2023
     exposed-modules: Year2023
@@ -34,13 +51,11 @@ library Year2023
         MyLib,
         advent-of-code-api,
         template-haskell,
-        optparse-applicative,
-        load-env,
         containers,
-        split,
         ghc,
         extra,
-        text
+    
+    ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
 
 library MyLib
     exposed-modules:  MyLib, TemplateHS
@@ -53,10 +68,11 @@ library MyLib
         advent-of-code-api,
         template-haskell,
         extra,
-        text,
+        formatting,
         time
     hs-source-dirs:   src
     default-language: Haskell2010
+    ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
 
 executable advent-of-code
     main-is:          Main.hs
@@ -69,15 +85,14 @@ executable advent-of-code
         base ^>=4.16.4.0,
         MyLib,
         Year2023,
+        Year2022,
         advent-of-code-api,
         template-haskell,
         optparse-applicative,
         load-env,
-        containers,
-        split,
         ghc,
-        extra,
-        text
+        text,
+        containers
 
     hs-source-dirs:   app
     default-language: Haskell2010

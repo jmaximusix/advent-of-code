@@ -1,8 +1,7 @@
 module Day05 (part1, part2) where
 
 import Data.Bifunctor (bimap, first)
-import Data.List.Extra (chunksOf, uncons)
-import Data.List.Split (splitOn)
+import Data.List.Extra (chunksOf, splitOn, uncons)
 import Data.Maybe (fromJust)
 
 type Range = (Int, Int)

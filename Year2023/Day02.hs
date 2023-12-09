@@ -1,7 +1,7 @@
 module Day02 (part1, part2) where
 
 import Data.Bifunctor (bimap)
-import Data.List.Split (chunksOf)
+import Data.List.Extra (chunksOf)
 import qualified Data.Map as Map (Map, empty, fromList, insertWith, toList, (!))
 import GHC.Utils.Misc (capitalise)
 
