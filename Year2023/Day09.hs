@@ -11,9 +11,9 @@ parseInput = map read . words
 
 predict :: Part -> [Int] -> Int
 predict part xs
-  | all (== 0) diffs = headlast xs
-  | otherwise = headlast xs `plusminus` predict part diffs
+  | all (== 0) diffs = edgeElement
+  | otherwise = edgeElement `plusminus` predict part diffs
   where
     diffs = zipWith (-) (tail xs) xs
-    headlast = if part == Part1 then last else head
+    edgeElement = if part == Part1 then last xs else head xs
     plusminus = if part == Part1 then (+) else (-)
