@@ -9,7 +9,7 @@ parseInput = map read . words
 
 predict :: [Int] -> Int
 predict xs
-  | all (== 0) diffs = head xs
-  | otherwise = head xs + predict diffs
+  | all (== 0) diffs = last xs
+  | otherwise = last xs + predict diffs
   where
     diffs = zipWith (-) (tail xs) xs
