@@ -1,4 +1,4 @@
-module MyLib (mostRecentChallenge, readPart, Date, replace) where
+module MyLib where
 
 import Advent (Day, Part (Part1, Part2), mkDay_)
 import Data.Time.Calendar (toGregorian)

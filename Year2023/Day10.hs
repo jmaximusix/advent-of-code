@@ -1,12 +1,11 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Day10 (part1, part2) where
 
 import Data.Bifunctor (bimap)
 import Data.Maybe (fromJust, mapMaybe)
-import Data.Tuple.Extra (both, dupe, second)
+import qualified Data.Set as Set (Set, insert, member, singleton)
+import Data.Tuple.Extra (both, dupe)
 import Geometry
-  ( Direction (D, L, R, U),
+  ( Direction (..),
     Grid,
     Pos,
     getGridElement,
@@ -26,33 +25,36 @@ part1, part2 :: [String] -> Int
 part1 = (`div` 2) . length . fst . getLoop
 part2 = uncurry countEnclosed . getLoop
 
-getLoop :: [String] -> ([Pos], PipeGrid)
+getLoop :: [String] -> (Set.Set Pos, PipeGrid)
 getLoop charGrid = (loop, grid)
   where
     loop = traverseLoop grid (s, dir) s
     (grid, (s, dir)) = start charGrid
 
-countEnclosed :: [Pos] -> PipeGrid -> Int
+countEnclosed :: Set.Set Pos -> PipeGrid -> Int
 countEnclosed loop =
-  length
-    . filter id
-    . uncurry (zipWith (\x -> (&&) x . odd @Int . (`div` 2)))
-    . second (scanl1 (+))
-    . unzip
-    . uncurry (zipWith (\p g -> if p `elem` loop then (False, (pipeToNum . fromJust) g) else (True, 0)))
+  fst
+    . foldl count (0, 0 :: Int)
+    . uncurry (zipWith evalIntersect)
     . bimap pointList concat
     . dupe
   where
+    count (c, n) n'
+      | n' == 0 && odd (n `div` 2) = (c + 1, n)
+      | otherwise = (c, n + n')
+    evalIntersect p g
+      | p `Set.member` loop = (pipeToNum . fromJust) g
+      | otherwise = 0
     pipeToNum p
-      | p == (L, R) = 0
+      | p == (L, R) = 4
       | p == (U, D) = 2
       | p == (L, U) || p == (R, D) = 1
       | p == (U, R) || p == (D, L) = -1
 
-traverseLoop :: PipeGrid -> (Pos, Direction) -> Pos -> [Pos]
+traverseLoop :: PipeGrid -> (Pos, Direction) -> Pos -> Set.Set Pos
 traverseLoop grid (p, d) startp
-  | p' == startp = [p']
-  | otherwise = p' : traverseLoop grid (p', d') startp
+  | p' == startp = Set.singleton p'
+  | otherwise = Set.insert p' $ traverseLoop grid (p', d') startp
   where
     p' = neighborInDirection d p
     (a, b) = fromJust $ getGridElement grid p'
@@ -62,7 +64,8 @@ traverseLoop grid (p, d) startp
 start :: [String] -> (PipeGrid, (Pos, Direction))
 start charGrid = (replace2d p (Just (a, b)) grid, (p, a))
   where
-    [a, b] = mapMaybe (\d -> getGridElement grid (neighborInDirection d p) >>= connects d) [L, U, R, D]
+    [a, b] = mapMaybe (\d -> adjacentPipes d >>= connects d) [L, U, R, D]
+    adjacentPipes = getGridElement grid . flip neighborInDirection p
     connects d ds = if uncurry (||) $ both ((d ==) . invertDir) ds then Just d else Nothing
     p = index2d 'S' charGrid
     grid = map (map parsePipe) charGrid
