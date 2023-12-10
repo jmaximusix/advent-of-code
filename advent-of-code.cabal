@@ -52,14 +52,14 @@ library Year2023
         advent-of-code-api,
         template-haskell,
         containers,
+        timeit,
         ghc,
         extra,
     
     ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
 
 library MyLib
-    exposed-modules:  MyLib, TemplateHS
-
+    exposed-modules:  MyLib, TemplateHS, Geometry
     -- Modules included in this library but not exported.
 
     -- LANGUAGE extensions used by modules in this package.
@@ -90,6 +90,7 @@ executable advent-of-code
         template-haskell,
         optparse-applicative,
         load-env,
+        timeit,
         ghc,
         text,
         containers

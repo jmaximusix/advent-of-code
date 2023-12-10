@@ -1,4 +1,4 @@
-module MyLib (mostRecentChallenge, readPart, Date, replace, replace2d) where
+module MyLib (mostRecentChallenge, readPart, Date, replace) where
 
 import Advent (Day, Part (Part1, Part2), mkDay_)
 import Data.Time.Calendar (toGregorian)
@@ -26,9 +26,6 @@ readPart "2" = Part2
 readPart "a" = Part1
 readPart "b" = Part2
 readPart _ = error "Invalid part. Use 1, 2, a, or b."
-
-replace2d :: (Int, Int) -> a -> [[a]] -> [[a]]
-replace2d (x, y) new grid = replace x (replace y new (grid !! x)) grid
 
 replace :: Int -> a -> [a] -> [a]
 replace i new list = take i list ++ [new] ++ drop (i + 1) list
