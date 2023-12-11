@@ -39,6 +39,9 @@ invertDir d = case d of
   R -> L
   D -> U
 
+tcabDist :: Pos -> Pos -> Int
+tcabDist (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
+
 neighborInDirection :: Direction -> Pos -> Pos
 neighborInDirection d (x, y) = case d of
   L -> (x - 1, y)
