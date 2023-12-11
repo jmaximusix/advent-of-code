@@ -54,6 +54,7 @@ library Year2023
         containers,
         timeit,
         ghc,
+        combinatorial,
         extra,
     
     ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
