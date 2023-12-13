@@ -26,10 +26,10 @@ verticalSymmetry n g
 
 verticalSymmetryFromTop :: Int -> Grid Char -> Maybe Int
 verticalSymmetryFromTop n g
-  | null works = Nothing
-  | otherwise = Just $ last works
+  | null symmetries = Nothing
+  | otherwise = Just $ last symmetries
   where
-    works = mapMaybe hasSymmetry [1 .. (length g `div` 2)]
+    symmetries = mapMaybe hasSymmetry [1 .. (length g `div` 2)]
     hasSymmetry i
       | differInExactlyN n (take i g) (reverse (take i (drop i g))) = Just i
       | otherwise = Nothing
