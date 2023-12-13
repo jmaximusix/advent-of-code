@@ -8,8 +8,8 @@ import Data.Tuple.Extra (both, dupe, second, swap)
 import Geometry (Grid, Pos, pointList, tcabDist)
 
 part1, part2 :: Grid Char -> Int
-part1 = solve 1
-part2 = solve 999999
+part1 = solve 2
+part2 = solve 1000000
 
 solve :: Int -> Grid Char -> Int
 solve expFactor =
@@ -17,7 +17,7 @@ solve expFactor =
     . map (\[a, b] -> tcabDist a b)
     . tuples 2
     . Set.toList
-    . expandUniverse expFactor
+    . expandUniverse (expFactor - 1)
     . parseInput
 
 isStar :: Char -> Bool
