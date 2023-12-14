@@ -3,73 +3,61 @@
 module Day14 (part1, part2) where
 
 import Data.Bifunctor (bimap)
-import Data.List (partition, sort)
-import Data.List.Extra (sortBy)
+import Data.Function (on)
+import Data.List (groupBy, sort, sortOn, tails)
+import Data.List.Extra (groupSortOn, sortBy)
 import qualified Data.Map as Map
 import Data.Ord (comparing)
 import qualified Data.Ord
 import qualified Data.Set as Set
-import Data.Tuple.Extra (both, dupe, swap)
+import Data.Tuple.Extra (both, swap)
 import Debug.Trace (traceShow, traceShowId)
 import Geometry
 
-type BoardInfo = (Set.Set Pos, (Int, Int))
-
 part1, part2 :: Grid Char -> Int
-part1 input = load
-  where
-    ((cubes, rounded), dim) = parseInput input
-    rounded' = rollDirection (U, dim) cubes rounded
-    load = evaluateLoad rounded' (snd dim)
-part2 input = evaluateLoad aftern (snd dim)
-  where
-    aftern = rollNCycles 999_999_999 dim cubes rounded
-    ((cubes, rounded), dim) = parseInput input
+part1 input = let (b, r) = parseInput input in evaluateLoad b (rollDirection b U r)
+part2 input = let (b, r) = parseInput input in evaluateLoad b (rollNCycles 999_999_999 b r)
 
-rollNCycles :: Int -> (Int, Int) -> Set.Set Pos -> Set.Set Pos -> Set.Set Pos
-rollNCycles n dim cubes rounded = record Map.! n'
+rollNCycles :: Int -> Grid Char -> Set.Set Pos -> Set.Set Pos
+rollNCycles n board rounded = traceShow (a, b) record Map.! n'
   where
     n' = ((n - a) `mod` period) + a
     period = b - a
-    (record, (a, b)) = rollUntilRepeating dim 0 Map.empty cubes rounded
+    (record, (a, b)) = rollUntilRepeating 0 board Map.empty rounded
 
-rollUntilRepeating :: (Int, Int) -> Int -> Map.Map (Set.Set Pos) Int -> Set.Set Pos -> Set.Set Pos -> (Map.Map Int (Set.Set Pos), (Int, Int))
-rollUntilRepeating _ n _ _ _ | traceShow n False = undefined
-rollUntilRepeating dim n record cubes rounded
+rollUntilRepeating :: Int -> Grid Char -> Map.Map (Set.Set Pos) Int -> Set.Set Pos -> (Map.Map Int (Set.Set Pos), (Int, Int))
+rollUntilRepeating n board record rounded
   | next `Map.member` record = (Map.fromList $ map swap $ Map.toList record, (record Map.! next, n))
-  | otherwise = rollUntilRepeating dim (n + 1) (Map.insert next n record) cubes next
+  | otherwise = rollUntilRepeating (n + 1) board (Map.insert next n record) next
   where
-    next = rollOneCycle dim cubes rounded
+    next = rollOneCycle board rounded
 
-rollOneCycle :: (Int, Int) -> Set.Set Pos -> Set.Set Pos -> Set.Set Pos
-rollOneCycle dim cubes rounded = foldl (\r d -> rollDirection (d, dim) cubes r) rounded [U, L, D, R]
+rollOneCycle :: Grid Char -> Set.Set Pos -> Set.Set Pos
+rollOneCycle b rounded = foldl (flip (rollDirection b)) rounded [U, L, D, R]
 
-evaluateLoad :: Set.Set Pos -> Int -> Int
-evaluateLoad rounded ydim = sum $ map (\(_, y) -> ydim - y) $ Set.toList rounded
+rollDirection :: Grid Char -> Direction -> Set.Set Pos -> Set.Set Pos
+rollDirection g d
+  | d == L || d == U = Set.foldl (moveToEdge g d) Set.empty
+  | otherwise = Set.foldr (flip (moveToEdge g d)) Set.empty
 
-rollDirection :: (Direction, (Int, Int)) -> Set.Set Pos -> Set.Set Pos -> Set.Set Pos
-rollDirection ds cubes r = foldl (yeet ds cubes) Set.empty $ sortInDirection (fst ds) $ Set.toList r
+evaluateLoad :: Grid Char -> Set.Set Pos -> Int
+evaluateLoad g = sum . map (((snd . dimensions) g -) . snd) . Set.toList
 
-sortInDirection :: Direction -> [Pos] -> [Pos]
-sortInDirection d
-  | d == U || d == L = sort
-  | otherwise = sortBy (comparing Data.Ord.Down)
-
-yeet :: (Direction, (Int, Int)) -> Set.Set Pos -> Set.Set Pos -> Pos -> Set.Set Pos
-yeet ds cubes rounded pos = Set.insert (newY ds (Set.union cubes rounded) pos) rounded
-
-newY :: (Direction, (Int, Int)) -> Set.Set Pos -> Pos -> Pos
-newY (d, dim) blocked p
-  | p' `Set.member` blocked || not (isInside dim p') = p
-  | otherwise = newY (d, dim) blocked p'
+moveToEdge :: Grid Char -> Direction -> Set.Set Pos -> Pos -> Set.Set Pos
+moveToEdge g d blocked p
+  | c == '#' || p' `Set.member` blocked = Set.insert p blocked
+  | otherwise = moveToEdge g d blocked p'
   where
     p' = neighborTo d p
+    c = getGridElementWithDefault '#' g p'
 
-parseInput :: Grid Char -> (BoardInfo, Set.Set Pos)
-parseInput input = ((cubes, dimensions input), rounded)
-  where
-    zipped = zipPoints input
-    (cubes, rounded) =
-      both
-        (Set.fromList . map fst)
-        (filter ((== '#') . snd) zipped, filter ((== 'O') . snd) zipped)
+parseInput :: Grid Char -> (Grid Char, Set.Set Pos)
+parseInput input =
+  ( input,
+    Set.fromList
+      . map fst
+      . filter
+        ((== 'O') . snd)
+      . zipPoints
+      $ input
+  )
