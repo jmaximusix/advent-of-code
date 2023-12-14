@@ -1,11 +1,11 @@
 module Day11 (part1, part2) where
 
 import Combinatorics (tuples)
-import Data.Bifunctor (bimap)
+import Control.Arrow ((&&&))
 import Data.List (transpose)
 import qualified Data.Set as Set (Set, fromList, map, toList)
-import Data.Tuple.Extra (both, dupe, second, swap)
-import Geometry (Grid, Pos, pointList, tcabDist)
+import Data.Tuple.Extra (both, swap)
+import Geometry (Grid, Pos, tcabDist, zipPoints)
 
 part1, part2 :: Grid Char -> Int
 part1 = solve 2
@@ -25,19 +25,16 @@ isStar = (== '#')
 
 parseInput :: Grid Char -> (Set.Set Pos, ([Int], [Int]))
 parseInput =
-  bimap
+  (&&&)
     ( Set.fromList
-        . map snd
-        . filter (isStar . fst)
-        . uncurry zip
-        . bimap concat pointList
+        . map fst
+        . filter (isStar . snd)
+        . zipPoints
     )
     ( both
         (map fst . filter (not . any isStar . snd) . zip [0 ..])
-        . second transpose
+        . (&&&) id transpose
     )
-    . both dupe
-    . dupe
 
 expandUniverse :: Int -> (Set.Set Pos, ([Int], [Int])) -> Set.Set Pos
 expandUniverse expFactor (set, empty) =

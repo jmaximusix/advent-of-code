@@ -1,7 +1,7 @@
 module Geometry where
 
 import Data.List (elemIndex)
-import Data.Maybe (fromJust, isNothing)
+import Data.Maybe (fromJust, fromMaybe, isNothing)
 import MyLib (replace)
 
 data Direction = L | U | R | D deriving (Show, Eq)
@@ -23,6 +23,9 @@ getGridElementSafe g (x, y)
   | x < 0 || y < 0 || y >= length g || x >= length (head g) = Nothing
   | otherwise = Just $ g !! y !! x
 
+getGridElementWithDefault :: a -> Grid a -> Pos -> a
+getGridElementWithDefault def g p = fromMaybe def $ getGridElementSafe g p
+
 getGridElement :: Grid a -> Pos -> a
 getGridElement g (x, y) = g !! y !! x
 
@@ -31,6 +34,9 @@ dimensions g = (length $ head g, length g)
 
 pointList :: Grid a -> [Pos]
 pointList g = let (xdim, ydim) = dimensions g in [(x, y) | y <- [0 .. ydim - 1], x <- [0 .. xdim - 1]]
+
+zipPoints :: Grid a -> [(Pos, a)]
+zipPoints g = zip (pointList g) (concat g)
 
 invertDir :: Direction -> Direction
 invertDir d = case d of
@@ -42,9 +48,15 @@ invertDir d = case d of
 tcabDist :: Pos -> Pos -> Int
 tcabDist (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
 
-neighborInDirection :: Direction -> Pos -> Pos
-neighborInDirection d (x, y) = case d of
+neighborsOct :: Pos -> [Pos]
+neighborsOct (x, y) = [(x', y') | y' <- [y - 1 .. y + 1], x' <- [x - 1 .. x + 1]]
+
+neighborTo :: Direction -> Pos -> Pos
+neighborTo d (x, y) = case d of
   L -> (x - 1, y)
   U -> (x, y - 1)
   R -> (x + 1, y)
   D -> (x, y + 1)
+
+isInside :: (Int, Int) -> Pos -> Bool
+isInside (xdim, ydim) (x, y) = x >= 0 && y >= 0 && x < xdim && y < ydim

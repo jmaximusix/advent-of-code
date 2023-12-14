@@ -1,9 +1,8 @@
 module Day10 (part1, part2) where
 
-import Data.Bifunctor (bimap)
 import Data.Maybe (fromJust, mapMaybe)
 import qualified Data.Set as Set (Set, insert, member, singleton)
-import Data.Tuple.Extra (both, dupe)
+import Data.Tuple.Extra (both)
 import Geometry
   ( Direction (..),
     Grid,
@@ -11,9 +10,9 @@ import Geometry
     getGridElement,
     index2d,
     invertDir,
-    neighborInDirection,
-    pointList,
+    neighborTo,
     replace2d,
+    zipPoints,
   )
 
 -- always sorted in clockwise order
@@ -35,9 +34,8 @@ countEnclosed :: Set.Set Pos -> PipeGrid -> Int
 countEnclosed loop =
   fst
     . foldl count (0, 0 :: Int)
-    . uncurry (zipWith evalIntersect)
-    . bimap pointList concat
-    . dupe
+    . map (uncurry evalIntersect)
+    . zipPoints
   where
     count (c, n) n'
       | n' == 0 && odd (n `div` 2) = (c + 1, n)
@@ -56,7 +54,7 @@ traverseLoop grid (p, d) startp
   | p' == startp = Set.singleton p'
   | otherwise = Set.insert p' $ traverseLoop grid (p', d') startp
   where
-    p' = neighborInDirection d p
+    p' = neighborTo d p
     (a, b) = fromJust $ getGridElement grid p'
     d' = if invertDir d == a then b else a
 
@@ -65,7 +63,7 @@ start :: [String] -> (PipeGrid, (Pos, Direction))
 start charGrid = (replace2d p (Just (a, b)) grid, (p, a))
   where
     [a, b] = mapMaybe (\d -> adjacentPipes d >>= connects d) [L, U, R, D]
-    adjacentPipes = getGridElement grid . flip neighborInDirection p
+    adjacentPipes = getGridElement grid . flip neighborTo p
     connects d ds = if uncurry (||) $ both ((d ==) . invertDir) ds then Just d else Nothing
     p = index2d 'S' charGrid
     grid = map (map parsePipe) charGrid

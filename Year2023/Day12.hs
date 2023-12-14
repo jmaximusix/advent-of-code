@@ -44,16 +44,16 @@ alignFirst is size = Map.mapKeys (++ rest) possiblePlacements
     possiblePlacements = foldl (place size) Map.empty $ init $ tails grouped
 
 place :: Int -> Map.Map Sequence Int -> [Sequence] -> Map.Map Sequence Int
-place size remains (xs : rest)
-  | head xs == Good || l < size = remains
-  | otherwise = Map.unionWith (+) remains genOptions
+place size existing (xs : rest)
+  | head xs == Good || l < size = existing
+  | otherwise = Map.unionWith (+) existing newPlacements
   where
     l = length xs
-    mayNotUseLast = if isBrokenAt (l - size - 1) xs then 1 else 0
-    genOptions =
+    upperBound = if isBrokenAt (l - size - 1) xs then l - 1 else l
+    newPlacements =
       Map.fromListWith (+) $
         map ((,1) . concat . (: rest) . (`drop` xs) . (+ 1)) $
-          filter (\n' -> not $ isBrokenAt n' xs) [size .. l - mayNotUseLast]
+          filter (\n' -> not $ isBrokenAt n' xs) [size .. upperBound]
 
 parseInput :: String -> (Sequence, [Int])
 parseInput str = (map charToInfo info, map read $ splitOn "," rules)

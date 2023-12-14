@@ -1,20 +1,17 @@
 module Day08 (part1, part2) where
 
-import Data.Bifunctor (bimap)
-import Data.Tuple.Extra (dupe)
+import Control.Arrow ((&&&))
 
 part1, part2 :: [String] -> Int
 part1 =
   length
     . uncurry filter
-    . bimap isVisible (points . length)
-    . dupe
+    . (&&&) isVisible (points . length)
     . map (map (read . pure))
 part2 =
   maximum
     . uncurry map
-    . bimap scenicScore (points . length)
-    . dupe
+    . (&&&) scenicScore (points . length)
     . map (map (read . pure))
 
 points :: Int -> [(Int, Int)]

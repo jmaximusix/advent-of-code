@@ -6,7 +6,6 @@ import Data.List.Extra (splitOn)
 import Data.Maybe (fromJust, isNothing)
 import Data.Set (Set, member)
 import qualified Data.Set as Set (fromList, insert, map, unions)
-import Data.Tuple.Extra (dupe, first)
 
 part1, part2 :: [String] -> Int
 part1 = solve Part1
@@ -15,8 +14,7 @@ part2 = solve Part2
 solve :: Part -> [String] -> Int
 solve part =
   uncurry (dropallsand part 0 (500, 0))
-    . first (pred . maximum . Set.map snd)
-    . dupe
+    . (>>=) (pred . maximum . Set.map snd) (,)
     . Set.unions
     . map parseline
 
