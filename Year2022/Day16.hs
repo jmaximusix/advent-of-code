@@ -2,7 +2,7 @@
 
 module Day16 (part1, part2) where
 
-import Algorithm.Search (bfs, dijkstraAssoc)
+import Algorithm.Search (aStarAssoc, bfs, dijkstraAssoc)
 import Data.List.Extra (splitOn)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, (!))
@@ -16,6 +16,8 @@ type Valve = (Int, Int)
 type Cost = Int
 
 type DistanceMap = Map (Set Int) Int
+
+data Position = Ready Int | InTransit Int Int
 
 data State
   = State
@@ -31,6 +33,7 @@ part1, part2 :: [String] -> Int
 part1 input = (\(Done x) -> x) $ last path
   where
     Just (_, path) = dijkstraAssoc (next dmap) (\case Done _ -> True; _ -> False) (State start valves 0 30)
+    -- Just (_, path) = aStarAssoc (next dmap) (heuristic dmap) (\case Done _ -> True; _ -> False) (State start valves 0 30)
     (dmap, valves, start) = parseValves input
 part2 = undefined
 
@@ -47,6 +50,10 @@ move adj (State l r p t) (l', f)
     dt = dist adj l l' + 1
     cost = min dt t * sum (Set.map snd r)
     t' = t - dt
+
+heuristic :: DistanceMap -> State -> Cost
+heuristic _ (Done _) = 0
+heuristic adj (State l r _ t) = sum $ Set.map (\(l', f) -> (t - (dist adj l l' + 1)) * f) r
 
 dist :: DistanceMap -> Int -> Int -> Int
 dist adj l l' = adj Map.! Set.fromList [l, l']
