@@ -4,7 +4,7 @@ import Data.List (elemIndex)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
 import MyLib (replace)
 
-data Direction = L | U | R | D deriving (Show, Eq)
+data Direction = L | U | R | D deriving (Show, Ord, Eq)
 
 type Grid a = [[a]]
 
