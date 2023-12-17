@@ -13,7 +13,7 @@ part2 grid = (sum . mapMaybe (maybeGearRatio grid) . pointList) grid
 maybePartNumber :: Grid Char -> Pos -> Maybe Int
 maybePartNumber grid pos@(x, y)
   | (not . isDigit) (getSym grid pos) || isDigit (getSym grid (x - 1, y)) = Nothing
-  | any isSymbol numNeighbors = number
+  | any (\c -> c == '.' || isDigit c) numNeighbors = number
   | otherwise = Nothing
   where
     numNeighbors = map (getSym grid) $ concat [neighborsOct (x', y) | x' <- [x .. x + len - 1]]
@@ -42,9 +42,6 @@ captureNumber array (x, y)
   where
     toLeft = takeWhile isDigit $ reverse $ take x $ array !! y
     toRight = takeWhile isDigit $ drop x $ array !! y
-
-isSymbol :: Char -> Bool
-isSymbol c = not (c == '.' || isDigit c)
 
 getSym :: Grid Char -> Pos -> Char
 getSym = getGridElementWithDefault '.'
