@@ -6,6 +6,8 @@ import MyLib (replace)
 
 data Direction = L | U | R | D deriving (Show, Ord, Eq)
 
+data Orientation = H | V deriving (Show, Ord, Eq)
+
 type Grid a = [[a]]
 
 type Pos = (Int, Int)
@@ -60,3 +62,18 @@ neighborTo d (x, y) = case d of
 
 isInside :: (Int, Int) -> Pos -> Bool
 isInside (xdim, ydim) (x, y) = x >= 0 && y >= 0 && x < xdim && y < ydim
+
+-- L is left, R is right, U is (continue) forward (no turn), D is backward (turn around)
+turn :: Direction -> Direction -> Direction
+turn turn' facing = case turn' of
+  U -> facing
+  D -> invertDir facing
+  R -> invertDir $ turn L facing
+  L -> case facing of
+    L -> D
+    U -> L
+    R -> U
+    D -> R
+
+isOnEdge :: Grid a -> Pos -> Bool
+isOnEdge g (x, y) = let (xm, ym) = dimensions g in x == 0 || y == 0 || x == xm - 1 || y == ym - 1
