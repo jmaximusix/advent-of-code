@@ -1,9 +1,14 @@
 {-# LANGUAGE LambdaCase #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Redundant bracket" #-}
 
 module Day16 (part1, part2) where
 
 import Algorithm.Search (aStarAssoc, bfs, dijkstraAssoc)
-import Data.List.Extra (splitOn)
+import Combinatorics (variate)
+import Data.List (partition)
+import Data.List.Extra (minimumOn, splitOn)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, (!))
 import Data.Maybe (fromJust)
@@ -17,11 +22,11 @@ type Cost = Int
 
 type DistanceMap = Map (Set Int) Int
 
-data Position = Ready Int | InTransit Int Int
+data Position = Ready Int | InTransit Valve Int deriving (Show, Eq, Ord)
 
 data State
   = State
-      { pos :: Int,
+      { pos :: [Position],
         remaining :: Set Valve,
         pressure :: Int,
         time :: Int
@@ -38,17 +43,33 @@ part1 input = (\(Done x) -> x) $ last path
 part2 = undefined
 
 next :: DistanceMap -> State -> [(State, Cost)]
-next adj state
+next adj state@(State {})
   | null (remaining state) = [(Done (pressure state), 0)]
-  | otherwise = [move adj state v | v <- Set.toList $ remaining state]
+  | otherwise = undefined
+  where
+    (moving, ready) = partition inTransit $ skipWaiting $ pos state
+    newgoals = [zipWith (\(Ready l) v -> InTransit v l) vs ready | vs <- variate (length ready) $ Set.toList (remaining state)]
 
-move :: DistanceMap -> State -> (Int, Int) -> (State, Cost)
-move adj (State l r p t) (l', f)
+inTransit :: Position -> Bool
+inTransit (InTransit _ _) = True
+inTransit _ = False
+
+skipWaiting :: [Position] -> [Position]
+skipWaiting ps
+  | all inTransit ps = map skip ps
+  | otherwise = ps
+  where
+    min = minimum $ map (\(InTransit _ t) -> t) ps
+    skip (InTransit l t) = let t' = t - min in if t' > 0 then InTransit l t' else Ready l
+
+move :: DistanceMap -> State -> [Valve] -> (State, Cost)
+move adj (State l r p t) vs
   | t' > 0 = (State l' (Set.delete (l', f) r) (p + f * t') t', cost)
   | otherwise = (Done p, cost)
   where
     dt = dist adj l l' + 1
     cost = min dt t * sum (Set.map snd r)
+    soos = zipWith (\(Ready l, (l', f)) -> let dt = dist adj l l' + 1 in InTransit ()) p vs
     t' = t - dt
 
 heuristic :: DistanceMap -> State -> Cost
@@ -56,7 +77,7 @@ heuristic _ (Done _) = 0
 heuristic adj (State l r _ t) = sum $ Set.map (\(l', f) -> (t - (dist adj l l' + 1)) * f) r
 
 dist :: DistanceMap -> Int -> Int -> Int
-dist adj l l' = adj Map.! Set.fromList [l, l']
+dist adj (Ready l) (Ready l') = adj Map.! Set.fromList [l, l']
 
 parseValves :: [String] -> (DistanceMap, Set Valve, Int)
 parseValves lines' = (Map.fromList distmap, Set.fromList valves, start)

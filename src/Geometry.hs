@@ -4,7 +4,9 @@ import Data.List (elemIndex)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
 import MyLib (replace)
 
-data Direction = L | U | R | D deriving (Show, Ord, Eq)
+type Range = (Int, Int)
+
+data Direction = L | U | R | D deriving (Show, Ord, Eq, Read)
 
 data Orientation = H | V deriving (Show, Ord, Eq)
 
@@ -12,7 +14,7 @@ type Grid a = [[a]]
 
 type Pos = (Int, Int)
 
-replace2d :: (Int, Int) -> a -> [[a]] -> [[a]]
+replace2d :: (Int, Int) -> a -> Grid a -> Grid a
 replace2d (x, y) new grid = replace y (replace x new (grid !! y)) grid
 
 index2d :: (Eq a) => a -> Grid a -> Pos
@@ -54,11 +56,14 @@ neighborsOct :: Pos -> [Pos]
 neighborsOct (x, y) = [(x', y') | y' <- [y - 1 .. y + 1], x' <- [x - 1 .. x + 1]]
 
 neighborTo :: Direction -> Pos -> Pos
-neighborTo d (x, y) = case d of
-  L -> (x - 1, y)
-  U -> (x, y - 1)
-  R -> (x + 1, y)
-  D -> (x, y + 1)
+neighborTo = goNSteps 1
+
+goNSteps :: Int -> Direction -> Pos -> Pos
+goNSteps n d (x, y) = case d of
+  L -> (x - n, y)
+  U -> (x, y - n)
+  R -> (x + n, y)
+  D -> (x, y + n)
 
 isInside :: (Int, Int) -> Pos -> Bool
 isInside (xdim, ydim) (x, y) = x >= 0 && y >= 0 && x < xdim && y < ydim
@@ -77,3 +82,12 @@ turn turn' facing = case turn' of
 
 isOnEdge :: Grid a -> Pos -> Bool
 isOnEdge g (x, y) = let (xm, ym) = dimensions g in x == 0 || y == 0 || x == xm - 1 || y == ym - 1
+
+-- a is the range that gets split on b, seperated in (inside, outside)
+intersect :: Range -> Range -> ([Range], [Range])
+intersect a@(a1, a2) b@(b1, b2)
+  | a1 >= b1 && a2 <= b2 = ([a], [])
+  | a1 < b1 && a2 > b2 = ([b], [(a1, b1), (b2, a2)])
+  | a1 < b2 && a2 > b2 = ([(a1, b2)], [(b2, a2)])
+  | a1 < b1 && a2 > b1 = ([(b1, a2)], [(a1, b1)])
+  | otherwise = ([], [a])
