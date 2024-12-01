@@ -25,7 +25,6 @@ import Data.Char (toLower)
 import qualified Data.Map as Map (keys)
 import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (pack, unpack)
-import Debug.Trace (trace, traceShowId)
 import LoadEnv (loadEnv)
 import MyLib (Date)
 import System.Environment (getEnv)
@@ -41,14 +40,16 @@ main = do
   loadEnv
   cache_dir <- getEnv "AOC_CACHE_DIR"
   sessionKey <- getEnv "AOC_SESSION_KEY"
+  repo <- getEnv "AOC_REPO"
+  email <- getEnv "AOC_EMAIL"
   (date@(day, year), part', submit, test) <- parseClap
   let options =
         AoCOpts
           { _aSessionKey = sessionKey,
             _aUserAgent =
               Advent.Api.AoCUserAgent
-                { Advent.Api._auaRepo = Data.Text.pack "github.com/jmaximusix/advent-of-code",
-                  Advent.Api._auaEmail = Data.Text.pack "jmaximusix@gmail.com"
+                { Advent.Api._auaRepo = Data.Text.pack repo,
+                  Advent.Api._auaEmail = Data.Text.pack email
                 },
             _aYear = year,
             _aCache = Just cache_dir,
