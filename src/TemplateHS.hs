@@ -28,5 +28,5 @@ solutionsForYear :: Q Exp
 solutionsForYear = do
   let name = printf "Year%d.solutions"
   let lookupYear y = fmap (y,) <$> lookupValueName (name y)
-  exist <- mapMaybeM lookupYear [2015 .. 2023]
+  exist <- mapMaybeM lookupYear [2015 .. 2025]
   listE $ map (\(a, b) -> tupE [litE $ integerL a, varE b]) exist

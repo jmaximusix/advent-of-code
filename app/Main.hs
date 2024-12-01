@@ -10,6 +10,7 @@ import Advent
         _aForce,
         _aSessionKey,
         _aThrottle,
+        _aUserAgent,
         _aYear
       ),
     Day,
@@ -18,11 +19,13 @@ import Advent
     runAoC_,
     showSubmitRes,
   )
+import qualified Advent as Advent.Api
 import Clap (Submit (Ask, Direct, No), parseClap)
 import Data.Char (toLower)
 import qualified Data.Map as Map (keys)
 import Data.Maybe (fromMaybe, isNothing)
-import Data.Text (unpack)
+import Data.Text (pack, unpack)
+import Debug.Trace (trace, traceShowId)
 import LoadEnv (loadEnv)
 import MyLib (Date)
 import System.Environment (getEnv)
@@ -31,6 +34,7 @@ import TemplateHS (solutionsForYear)
 import Text.Printf (printf)
 import qualified Year2022
 import qualified Year2023
+import qualified Year2024
 
 main :: IO ()
 main = do
@@ -41,6 +45,11 @@ main = do
   let options =
         AoCOpts
           { _aSessionKey = sessionKey,
+            _aUserAgent =
+              Advent.Api.AoCUserAgent
+                { Advent.Api._auaRepo = Data.Text.pack "github.com/jmaximusix/advent-of-code",
+                  Advent.Api._auaEmail = Data.Text.pack "jmaximusix@gmail.com"
+                },
             _aYear = year,
             _aCache = Just cache_dir,
             _aForce = False,
