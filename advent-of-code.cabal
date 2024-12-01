@@ -75,7 +75,6 @@ library Year2023
         search-algorithms,
         template-haskell,
         containers,
-        timeit,
         ghc,
         combinatorial,
         extra,
@@ -94,8 +93,6 @@ library Year2024
         search-algorithms,
         template-haskell,
         containers,
-        timeit,
-        ghc,
         combinatorial,
         extra,
     
