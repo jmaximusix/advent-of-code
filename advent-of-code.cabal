@@ -23,6 +23,26 @@ extra-source-files:
     CHANGELOG.md
     README.md
 
+library Year2015
+    exposed-modules: Year2015
+
+    other-modules: Day01
+    hs-source-dirs: Year2015
+    default-language: Haskell2010
+    build-depends: base ^>=4.16.4.0,
+        MyLib,
+        advent-of-code-api,
+        template-haskell,
+        extra,
+        containers,
+        combinatorial,
+        linear,
+        ilist,
+        search-algorithms,
+        split
+    
+    ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
+
 library Year2022
     exposed-modules: Year2022
 
@@ -87,6 +107,8 @@ library Year2024
 -- 3. Add the new library to the build-depends of the executable.
 -- 4. Import the library in Main.hs
 -- 5. Add the new year to the list of years in TemplateHS.hs:31
+-- 6. Add traceShowId around (year) in Main.hs:97 (let solutions = ...)
+--    For whatever reason this is necessary for the first execution otherwise TH won't register the new solutions.
 
 library MyLib
     exposed-modules:  MyLib, TemplateHS, Geometry
@@ -114,9 +136,10 @@ executable advent-of-code
     build-depends:
         base ^>=4.16.4.0,
         MyLib,
-        Year2024,
-        Year2023,
+        Year2015,
         Year2022,
+        Year2023,
+        Year2024,
         advent-of-code-api,
         template-haskell,
         optparse-applicative,

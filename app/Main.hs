@@ -25,12 +25,14 @@ import Data.Char (toLower)
 import qualified Data.Map as Map (keys)
 import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (pack, unpack)
+import Debug.Trace (traceShowId)
 import LoadEnv (loadEnv)
 import MyLib (Date)
 import System.Environment (getEnv)
 import System.IO (hFlush, stdout)
 import TemplateHS (solutionsForYear)
 import Text.Printf (printf)
+import qualified Year2015
 import qualified Year2022
 import qualified Year2023
 import qualified Year2024
