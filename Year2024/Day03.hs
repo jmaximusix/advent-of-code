@@ -8,10 +8,12 @@ part1 = solve "mul\\([0-9]{1,3},[0-9]{1,3}\\)"
 part2 = solve "mul\\([0-9]{1,3},[0-9]{1,3}\\)|don't\\(\\)|do\\(\\)"
 
 solve :: String -> [String] -> Int
-solve pattern = snd . foldl process (True, 0) . parse pattern . unlines
-
-parse :: String -> String -> [String]
-parse pattern = getAllTextMatches . (=~ pattern)
+solve pattern =
+  snd
+    . foldl process (True, 0)
+    . getAllTextMatches
+    . ((=~ pattern) :: String -> AllTextMatches [] String)
+    . unlines
 
 process :: (Bool, Int) -> String -> (Bool, Int)
 process (_, acc) "don't()" = (False, acc)
