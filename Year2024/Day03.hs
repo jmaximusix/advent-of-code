@@ -3,8 +3,6 @@ module Day03 (part1, part2) where
 import Data.List.Extra (splitOn)
 import Text.Regex.TDFA (AllTextMatches (getAllTextMatches), (=~))
 
-data Instruction = Mul Int Int | Dont | Do deriving (Show)
-
 part1, part2 :: [String] -> Int
 part1 = solve "mul\\([0-9]{1,3},[0-9]{1,3}\\)"
 part2 = solve "mul\\([0-9]{1,3},[0-9]{1,3}\\)|don't\\(\\)|do\\(\\)"
@@ -12,22 +10,16 @@ part2 = solve "mul\\([0-9]{1,3},[0-9]{1,3}\\)|don't\\(\\)|do\\(\\)"
 solve :: String -> [String] -> Int
 solve pattern = snd . foldl process (True, 0) . parse pattern . unlines
 
-parse :: String -> String -> [Instruction]
-parse pattern = map readInstruction . getAllTextMatches . flip (=~) pattern
+parse :: String -> String -> [String]
+parse pattern = getAllTextMatches . (=~ pattern)
 
-readInstruction :: String -> Instruction
-readInstruction s
-  | s == "don't()" = Dont
-  | s == "do()" = Do
-  | otherwise = Mul a' b'
+process :: (Bool, Int) -> String -> (Bool, Int)
+process (_, acc) "don't()" = (False, acc)
+process (_, acc) "do()" = (True, acc)
+process (enabled, acc) s
+  | enabled = (enabled, acc + a' * b')
+  | otherwise = (enabled, acc)
   where
     [a, b] = splitOn "," s
     a' = read $ drop 4 a
     b' = read $ init b
-
-process :: (Bool, Int) -> Instruction -> (Bool, Int)
-process (_, acc) Dont = (False, acc)
-process (_, acc) Do = (True, acc)
-process (enabled, acc) (Mul a b)
-  | enabled = (enabled, acc + a * b)
-  | otherwise = (enabled, acc)
