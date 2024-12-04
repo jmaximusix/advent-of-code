@@ -9,7 +9,7 @@ import Text.Regex.TDFA ((=~))
 
 part1, part2 :: [[Char]] -> Int
 part1 input = countXmas input + countXmas (transpose input) + countXmas (diagonals input)
-part2 input = length $ filter (posMas input) (pointList input)
+part2 input = length $ filter (isMasCenterA input) (pointList input)
 
 countXmas :: [String] -> Int
 countXmas = sum . map (\l -> (l =~ "XMAS" :: Int) + (reverse l =~ "XMAS" :: Int))
@@ -20,8 +20,8 @@ diagonals g = mainDiags g ++ mainDiags (reverse g)
     (w, h) = both (subtract 1) (dimensions g)
     mainDiags g' = [[g' !! a !! (n - a) | a <- [0 .. min n w], (n - a) < h + 1] | n <- [0 .. w + h]]
 
-posMas :: Grid Char -> Pos -> Bool
-posMas g pos@(x, y)
+isMasCenterA :: Grid Char -> Pos -> Bool
+isMasCenterA g pos@(x, y)
   | getGridElement g pos /= 'A' = False
   | otherwise = diag ((x + 1, y + 1), (x - 1, y - 1)) && diag ((x + 1, y - 1), (x - 1, y + 1))
   where
