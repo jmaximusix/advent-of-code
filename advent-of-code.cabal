@@ -84,7 +84,7 @@ library Year2023
 library Year2024
     exposed-modules: Year2024
 
-    other-modules: Day01, Day02, Day03
+    other-modules: Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08
     hs-source-dirs: Year2024
     default-language: Haskell2010
     build-depends: base ^>=4.16.4.0,
