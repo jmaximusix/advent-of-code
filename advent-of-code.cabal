@@ -95,6 +95,7 @@ library Year2024
         containers,
         combinatorial,
         extra,
+        ghc,
         regex-tdfa,
     
     ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
