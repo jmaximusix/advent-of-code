@@ -64,12 +64,12 @@ main = do
   if submit == No && isNothing part'
     then do
       timings@[t1, t2] <- mapM (fmap snd . getTimedResult date input) [Part1, Part2]
-      printf "\nTotal time: %dms [%dms + %dms]\n\n" (sum timings) t1 t2
+      printf "\nTotal time: %dms [%dms + %dms]\n" (sum timings) t1 t2
     else do
       part <- maybe (latestAvailablePart options day) pure part'
       (result, time) <- getTimedResult date input part
       submitResult submit options day part result
-      printf "\nTotal time: %dms\n\n" time
+      printf "\nTotal time: %dms\n" time
 
 latestAvailablePart :: AoCOpts -> Day -> IO Part
 latestAvailablePart options day =
