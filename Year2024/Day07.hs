@@ -1,6 +1,6 @@
 module Day07 (part1, part2) where
 
-import Advent (Part (Part1, Part2))
+import Advent (Part (..))
 import Data.List (isSuffixOf)
 
 part1, part2 :: [String] -> Int
