@@ -14,7 +14,7 @@ canCreateFrom _ res [n] = res == n
 canCreateFrom p res (n : ns)
   | canCreateFrom p (res - n) ns = True
   | res `rem` n == 0 && canCreateFrom p (res `div` n) ns = True
-  | p == Part2 && res `rem` tenp == n = canCreateFrom p (res `div` tenp) ns
+  | p == Part2 && res `rem` t == n = canCreateFrom p (res `div` t) ns
   | otherwise = False
   where
-    tenp = 10 ^ (floor (logBase (10 :: Double) (fromIntegral n)) + 1 :: Int)
+    t = 10 ^ length (show n)
