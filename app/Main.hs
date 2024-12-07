@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Main where
+module Main (main) where
 
 import Advent
   ( AoC (AoCInput, AoCPrompt, AoCSubmit),
@@ -25,11 +25,11 @@ import Data.Char (toLower)
 import qualified Data.Map as Map (keys)
 import Data.Maybe (fromMaybe, isNothing)
 import Data.Text (pack, unpack)
-import Debug.Trace (traceShowId)
 import LoadEnv (loadEnv)
 import MyLib (Date)
 import System.Environment (getEnv)
 import System.IO (hFlush, stdout)
+import System.TimeIt (timeItT)
 import TemplateHS (solutionsForYear)
 import Text.Printf (printf)
 import qualified Year2015
@@ -42,16 +42,16 @@ main = do
   loadEnv
   cache_dir <- getEnv "AOC_CACHE_DIR"
   sessionKey <- getEnv "AOC_SESSION_KEY"
-  repo <- getEnv "AOC_REPO"
-  email <- getEnv "AOC_EMAIL"
+  repo <- Data.Text.pack <$> getEnv "AOC_REPO"
+  email <- Data.Text.pack <$> getEnv "AOC_EMAIL"
   (date@(day, year), part', submit, test) <- parseClap
   let options =
         AoCOpts
           { _aSessionKey = sessionKey,
             _aUserAgent =
               Advent.Api.AoCUserAgent
-                { Advent.Api._auaRepo = Data.Text.pack repo,
-                  Advent.Api._auaEmail = Data.Text.pack email
+                { Advent.Api._auaRepo = repo,
+                  Advent.Api._auaEmail = email
                 },
             _aYear = year,
             _aCache = Just cache_dir,
@@ -63,11 +63,24 @@ main = do
   input <- getInput date cache_dir options test
   if submit == No && isNothing part'
     then do
-      mapM_ (getResult date input) [Part1, Part2]
+      timings@[t1, t2] <- mapM (fmap snd . getTimedResult date input) [Part1, Part2]
+      printf "\nTotal time: %dms [%dms + %dms]\n\n" (sum timings) t1 t2
     else do
-      prompt <- runAoC_ options $ AoCPrompt day
-      let part = fromMaybe (last $ Map.keys prompt) part'
-      submitResult submit options day part =<< getResult date input part
+      part <- maybe (latestAvailablePart options day) pure part'
+      (result, time) <- getTimedResult date input part
+      submitResult submit options day part result
+      printf "\nTotal time: %dms\n\n" time
+
+latestAvailablePart :: AoCOpts -> Day -> IO Part
+latestAvailablePart options day =
+  do
+    prompt <- runAoC_ options $ AoCPrompt day
+    return (last $ Map.keys prompt)
+
+getTimedResult :: Date -> [String] -> Part -> IO (String, Int)
+getTimedResult date input part = do
+  (time, result) <- timeItT $ getResult date input part
+  return (result, ceiling (1000 * time))
 
 getInput :: Date -> String -> AoCOpts -> Bool -> IO [String]
 getInput (day, year) cache _ True = lines <$> readFile (printf "%stest/%d/test%d.txt" cache year (dayInt day))
@@ -97,7 +110,7 @@ getResult (day, year) input part = do
   let solutions = fromMaybe (error "No solutions for year") $ lookup year $(solutionsForYear)
   let (p1, p2) = fromMaybe (error "Solution not defined") $ lookup (dayInt day) solutions
   let result = case part of
-        Part1 -> p1 input :: String
+        Part1 -> p1 input
         Part2 -> p2 input
   putStrLn $ printf "%s: %s" (show part) result
   return result
