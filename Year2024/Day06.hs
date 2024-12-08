@@ -2,7 +2,7 @@ module Day06 (part1, part2) where
 
 import Data.Maybe (fromJust, isNothing)
 import qualified Data.Set as Set (Set, delete, filter, fromList, insert, map, member)
-import Geometry (Direction (R, U), Grid, Pos, dimensions, getGridElementSafe, goNSteps, index2d, isInside, replace2d, turn)
+import Geometry (Direction (R, U), Grid, Pos, getGridElementSafe, goNSteps, index2d, isInside, replace2d, turn)
 
 part1, part2 :: Grid Char -> Int
 part1 grid = length $ fromJust $ exitPath (start, Set.fromList [start]) grid
@@ -17,7 +17,7 @@ part2 grid = length $ Set.filter (isNothing . exitPath (start, Set.fromList [sta
 -- Just (Set of visited positions) | Nothing (Guard is stuck in loop)
 exitPath :: ((Pos, Direction), Set.Set (Pos, Direction)) -> Grid Char -> Maybe (Set.Set Pos)
 exitPath (current, visited) g
-  | (not . isInside (dimensions g)) loc' = Just (Set.map fst visited)
+  | (not . isInside g) loc' = Just (Set.map fst visited)
   | new `Set.member` visited = Nothing
   | otherwise = exitPath (new, new `Set.insert` visited) g
   where

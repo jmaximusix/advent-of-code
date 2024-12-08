@@ -93,6 +93,7 @@ library Year2024
         search-algorithms,
         template-haskell,
         containers,
+        linear,
         combinatorial,
         extra,
         ghc,
@@ -118,6 +119,7 @@ library MyLib
     build-depends:    base ^>=4.16.4.0,
         advent-of-code-api,
         template-haskell,
+        linear,
         extra,
         formatting,
         time

@@ -2,6 +2,7 @@ module Geometry where
 
 import Data.List (elemIndex)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
+import Linear (V2 (V2))
 import MyLib (replace)
 
 type Range = (Int, Int)
@@ -13,6 +14,12 @@ data Orientation = H | V deriving (Show, Ord, Eq)
 type Grid a = [[a]]
 
 type Pos = (Int, Int)
+
+toV2 :: Pos -> V2 Int
+toV2 (x, y) = V2 x y
+
+toPos :: V2 Int -> Pos
+toPos (V2 x y) = (x, y)
 
 replace2d :: (Int, Int) -> a -> Grid a -> Grid a
 replace2d (x, y) new grid = replace y (replace x new (grid !! y)) grid
@@ -65,8 +72,10 @@ goNSteps n d (x, y) = case d of
   R -> (x + n, y)
   D -> (x, y + n)
 
-isInside :: (Int, Int) -> Pos -> Bool
-isInside (xdim, ydim) (x, y) = x >= 0 && y >= 0 && x < xdim && y < ydim
+isInside :: Grid a -> Pos -> Bool
+isInside grid (x, y) =
+  let (xdim, ydim) = dimensions grid
+   in x >= 0 && y >= 0 && x < xdim && y < ydim
 
 -- L is left, R is right, U is (continue) forward (no turn), D is backward (turn around)
 turn :: Direction -> Direction -> Direction

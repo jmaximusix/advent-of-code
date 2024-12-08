@@ -1,28 +1,39 @@
 module Day08 (part1, part2) where
 
-import Combinatorics
-import Data.List (groupBy, sort, sortOn)
+import Combinatorics (variate)
+import Data.List (sortOn)
 import Data.List.Extra (groupOn)
-import qualified Data.Set as Set (Set, empty, filter, fromList, insert, union)
-import Debug.Trace (traceShow, traceShowId)
-import GHC.Cmm (vec)
-import Geometry (Grid, Pos, dimensions, isInside, zipPoints)
+import qualified Data.Set as Set (empty, fromList, union)
+import Data.Tuple.Extra (both)
+import Geometry (Grid, isInside, toPos, toV2, zipPoints)
+import Linear (V2 (V2))
+import MyLib (tup2)
 
 part1, part2 :: Grid Char -> Int
-part1 input = length $ Set.filter (isInside (dimensions input)) $ foldl freqAntennas Set.empty (groupOn snd $ sortOn snd $ filter (\(_, a) -> a /= '.') $ zipPoints input)
-part2 = undefined
+part1 = solve (\g a b -> filter (isInside g . toPos) [2 * b - a, 2 * a - b])
+part2 =
+  solve
+    ( \g a b ->
+        let d = toPos (b - a)
+            filldir f = takeWhile (isInside g . toPos) (iterate (f ((uncurry V2 . both (`div` uncurry gcd d)) d)) b)
+         in filldir (+) ++ filldir (flip (-))
+    )
 
-freqAntennas :: Set.Set Pos -> [(Pos, Char)] -> Set.Set Pos
-freqAntennas set freq = Set.union set $ traceShowId $ Set.fromList $ concatMap (\[a, b] -> antennas a b) (variate 2 $ map fst freq)
-
-antennas :: Pos -> Pos -> [Pos]
-antennas (a1, a2) (b1, b2) = [(2 * b1 - a1, 2 * b2 - a2), (2 * a1 - b1, 2 * a2 - b2)]
-
--- vecminus :: Pos -> Pos -> Pos
--- vecminus (x1, y1) (x2, y2) = (x1 - x2, y1 - y2)
-
--- vecscalmult :: Int -> Pos -> Pos
--- vecscalmult s (x, y) = (s * x, s * y)
-
--- vecplus :: Pos -> Pos -> Pos
--- vecplus (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
+solve :: (Grid Char -> V2 Int -> V2 Int -> [V2 Int]) -> Grid Char -> Int
+solve antennas g =
+  length
+    . foldl
+      ( \s ->
+          Set.union s
+            . Set.fromList
+            . concatMap (uncurry (antennas g) . tup2)
+            . variate 2
+      )
+      Set.empty
+    . ( map (map (toV2 . fst))
+          . groupOn snd
+          . sortOn snd
+          . filter ((/= '.') . snd)
+          . zipPoints
+      )
+    $ g
