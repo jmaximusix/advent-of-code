@@ -1,50 +1,31 @@
 module Day09 (part1, part2) where
 
-import Data.Bifunctor (bimap, second)
-import Data.List (find, findIndex, uncons)
-import Data.List.Extra (chunksOf, unsnoc)
-import Data.Maybe (catMaybes, fromJust, fromMaybe, isJust, isNothing)
-import Debug.Trace (traceShow, traceShowId)
-import MyLib (tup2)
-
--- ((fileid, length of file), free space following)
-type File = ((Int, Int), Int)
+import Data.List (find, partition)
+import Data.List.Extra (chunksOf)
+import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
+import MyLib (replace)
 
 part1, part2 :: [String] -> Int
-part1 input = sum $ zipWith (*) [0 ..] $ fst reordered
+part1 input = sum (map (\(i, Just fid) -> i * fid) untouched) + sum (zipWith (*) (map fst spaces) (reverse (catMaybes right)))
   where
-    filelist = parseInput (head input ++ "0")
-    freeSpace = sum $ map snd filelist
-    stream = concatMap blockStream filelist
-    splitPoint = length stream - freeSpace
-    (before, after) = splitAt splitPoint stream
-    reordered = foldl foldFunc ([], reverse (catMaybes after)) before
-part2 input = fst $ foldl calcRes (0, 0) reordered
+    blocks = concat . zipWith (\fid [l, s] -> replicate l (Just fid) ++ replicate s Nothing) [0 ..] . parseChunks $ input
+    splitIdx = length $ filter isJust blocks
+    (left, right) = splitAt splitIdx blocks
+    (untouched, spaces) = partition (isJust . snd) $ zip [0 ..] left
+part2 input = fst $ foldl moveAndChecksum (0, spaces) files
   where
-    filelist = parseInput (head input ++ "0")
-    reordered = foldl tryFit filelist (reverse [0 .. length filelist - 1])
+    (files, spaces) = fst . foldl f (([], []), 0) . zip [0 ..] . parseChunks $ input
+    f ((fs, sp), idx) (fid, [l, s]) = (((idx, (fid, l)) : fs, sp ++ [(idx + l, s)]), idx + l + s)
 
-parseInput :: String -> [File]
-parseInput = zipWith (\i [l, s] -> ((i, l), s)) [0 ..] . chunksOf 2 . map (\x -> read [x])
+parseChunks :: [String] -> [[Int]]
+parseChunks = chunksOf 2 . (++ [0]) . map (\x -> read [x]) . head
 
-blockStream :: File -> [Maybe Int]
-blockStream ((fileid, len), freeSpace) = replicate len (Just fileid) ++ replicate freeSpace Nothing
-
-foldFunc :: ([Int], [Int]) -> Maybe Int -> ([Int], [Int])
-foldFunc (merged, backup) Nothing = (merged ++ [head backup], tail backup)
-foldFunc (merged, backup) (Just x) = (merged ++ [x], backup)
-
-tryFit :: [File] -> Int -> [File]
-tryFit files fid
-  | isNothing spaceidx = files
-  | fromJust spaceidx == fileidx - 1 = before' ++ [(sp, 0), (f, sps + fs)] ++ after
-  | otherwise = before' ++ [(sp, 0), (f, sps - fl)] ++ between' ++ [(bf, bfs + fl + fs)] ++ after
+moveAndChecksum :: (Int, [(Int, Int)]) -> (Int, (Int, Int)) -> (Int, [(Int, Int)])
+moveAndChecksum (acc, spaces) (fidx, f@(_, fl))
+  | isNothing maybesp || sidx > fidx = (acc + checksum fidx f, spaces)
+  | otherwise = (acc + checksum sidx f, spaces')
   where
-    fileidx = fromJust $ findIndex (\((id', _), _) -> id' == fid) files
-    (before, (f@(_, fl), fs) : after) = splitAt fileidx files
-    spaceidx = findIndex (\s -> snd s >= fl) before
-    (before', (sp, sps) : between) = splitAt (fromJust spaceidx) before
-    (between', (bf, bfs)) = fromJust $ unsnoc between
-
-calcRes :: (Int, Int) -> File -> (Int, Int)
-calcRes (acc, idx) ((f, l), s) = (acc + f * (idx * l + ((l * (l - 1)) `div` 2)), idx + l + s)
+    maybesp = find ((fl <=) . snd . fst) $ zip spaces [0 ..]
+    ((sidx, w), spaceidx) = fromJust maybesp
+    spaces' = replace spaceidx (sidx + fl, w - fl) spaces
+    checksum i' (f', l') = f' * (i' * l' + ((l' * (l' - 1)) `div` 2))
