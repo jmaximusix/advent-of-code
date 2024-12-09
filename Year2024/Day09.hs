@@ -3,7 +3,7 @@ module Day09 (part1, part2) where
 import Data.List (find, partition)
 import Data.List.Extra (chunksOf)
 import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
-import MyLib (replace)
+import MyLib (deleteAt, replace)
 
 part1, part2 :: [String] -> Int
 part1 input = sum (map (\(i, Just fid) -> i * fid) untouched) + sum (zipWith (*) (map fst spaces) (reverse (catMaybes right)))
@@ -23,9 +23,11 @@ parseChunks = chunksOf 2 . (++ [0]) . map (\x -> read [x]) . head
 moveAndChecksum :: (Int, [(Int, Int)]) -> (Int, (Int, Int)) -> (Int, [(Int, Int)])
 moveAndChecksum (acc, spaces) (fidx, f@(_, fl))
   | isNothing maybesp || sidx > fidx = (acc + checksum fidx f, spaces)
-  | otherwise = (acc + checksum sidx f, spaces')
+  | otherwise = (acc + checksum sidx f, adjspaces (sidx + fl, w - fl))
   where
     maybesp = find ((fl <=) . snd . fst) $ zip spaces [0 ..]
     ((sidx, w), spaceidx) = fromJust maybesp
-    spaces' = replace spaceidx (sidx + fl, w - fl) spaces
+    adjspaces sp'
+      | snd sp' == 0 = deleteAt spaceidx spaces
+      | otherwise = replace spaceidx sp' spaces
     checksum i' (f', l') = f' * (i' * l' + ((l' * (l' - 1)) `div` 2))

@@ -33,5 +33,8 @@ replace i new list = take i list ++ (new : drop (i + 1) list)
 modifyAt :: Int -> (a -> a) -> [a] -> [a]
 modifyAt i f list = take i list ++ (f (list !! i) : drop (i + 1) list)
 
+deleteAt :: Int -> [a] -> [a]
+deleteAt i list = take i list ++ drop (i + 1) list
+
 tup2 :: [a] -> (a, a)
 tup2 [a, b] = (a, b)
