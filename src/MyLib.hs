@@ -28,7 +28,10 @@ readPart "b" = Part2
 readPart _ = error "Invalid part. Use 1, 2, a, or b."
 
 replace :: Int -> a -> [a] -> [a]
-replace i new list = take i list ++ [new] ++ drop (i + 1) list
+replace i new list = take i list ++ (new : drop (i + 1) list)
+
+modifyAt :: Int -> (a -> a) -> [a] -> [a]
+modifyAt i f list = take i list ++ (f (list !! i) : drop (i + 1) list)
 
 tup2 :: [a] -> (a, a)
 tup2 [a, b] = (a, b)

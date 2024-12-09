@@ -96,7 +96,6 @@ library Year2024
         linear,
         combinatorial,
         extra,
-        timeit,
         ghc,
         regex-tdfa,
     
@@ -146,6 +145,7 @@ executable advent-of-code
         template-haskell,
         optparse-applicative,
         load-env,
+        timeit,
         ghc,
         text,
         containers

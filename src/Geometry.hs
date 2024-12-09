@@ -9,6 +9,8 @@ type Range = (Int, Int)
 
 data Direction = L | U | R | D deriving (Show, Ord, Eq, Read)
 
+data DirectionOct = N | NE | E | SE | S | SW | W | NW deriving (Show, Ord, Eq, Read)
+
 data Orientation = H | V deriving (Show, Ord, Eq)
 
 type Grid a = [[a]]
