@@ -96,8 +96,8 @@ library Year2024
         linear,
         combinatorial,
         extra,
+        timeit,
         ghc,
-        split,
         regex-tdfa,
     
     ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
@@ -146,7 +146,6 @@ executable advent-of-code
         template-haskell,
         optparse-applicative,
         load-env,
-        timeit,
         ghc,
         text,
         containers
