@@ -64,6 +64,9 @@ tcabDist (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
 neighborsOct :: Pos -> [Pos]
 neighborsOct (x, y) = [(x', y') | y' <- [y - 1 .. y + 1], x' <- [x - 1 .. x + 1]]
 
+neighbors :: Pos -> [Pos]
+neighbors p = map (`neighborTo` p) [L, U, R, D]
+
 neighborTo :: Direction -> Pos -> Pos
 neighborTo = goNSteps 1
 
