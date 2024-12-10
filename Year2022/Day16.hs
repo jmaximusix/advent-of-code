@@ -37,13 +37,13 @@ data State
 part1, part2 :: [String] -> Int
 part1 input = (\(Done x) -> x) $ last path
   where
-    Just (_, path) = dijkstraAssoc (next dmap) (\case Done _ -> True; _ -> False) (State start valves 0 30)
+    Just (_, path) = dijkstraAssoc (next dmap) (\case Done _ -> True; _ -> False) (State [Ready start] valves 0 30)
     -- Just (_, path) = aStarAssoc (next dmap) (heuristic dmap) (\case Done _ -> True; _ -> False) (State start valves 0 30)
     (dmap, valves, start) = parseValves input
 part2 = undefined
 
 next :: DistanceMap -> State -> [(State, Cost)]
-next adj state@(State {})
+next adj state
   | null (remaining state) = [(Done (pressure state), 0)]
   | otherwise = undefined
   where
@@ -69,7 +69,7 @@ move adj (State l r p t) vs
   where
     dt = dist adj l l' + 1
     cost = min dt t * sum (Set.map snd r)
-    soos = zipWith (\(Ready l, (l', f)) -> let dt = dist adj l l' + 1 in InTransit ()) p vs
+    soos = zipWith (\(Ready l'', (l', f)) -> let dt = dist adj l'' l' + 1 in InTransit ()) p vs
     t' = t - dt
 
 heuristic :: DistanceMap -> State -> Cost
