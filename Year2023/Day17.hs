@@ -4,9 +4,18 @@ module Day17 (part1, part2) where
 
 import Advent (Part (..))
 import Algorithm.Search (dijkstraAssoc)
+import Data.Char (digitToInt)
 import Data.Maybe (mapMaybe)
 import Data.Tuple.Extra (both)
 import Geometry
+  ( Direction (L, R),
+    Grid,
+    Pos,
+    dimensions,
+    getGridElementSafe,
+    neighborTo,
+    turn,
+  )
 
 type State = (Pos, (Direction, Int))
 
@@ -27,7 +36,7 @@ next part grid (pos, dirlen) = mapMaybe moveTo (allowedTurns part dirlen)
   where
     moveTo dl@(d, _) =
       let pos' = neighborTo d pos
-       in (((pos', dl),) . read . pure <$> getGridElementSafe grid pos')
+       in (((pos', dl),) . digitToInt <$> getGridElementSafe grid pos')
 
 allowedTurns :: Part -> (Direction, Int) -> [(Direction, Int)]
 allowedTurns p (dir, len) = case p of

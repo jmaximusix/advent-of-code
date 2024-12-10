@@ -1,29 +1,31 @@
 module Day08 (part1, part2) where
 
 import Control.Arrow ((&&&))
+import Data.Char (digitToInt)
+import Geometry (Grid, Pos)
 
-part1, part2 :: [String] -> Int
+part1, part2 :: Grid Char -> Int
 part1 =
   length
     . uncurry filter
     . (&&&) isVisible (points . length)
-    . map (map (read . pure))
+    . map (map digitToInt)
 part2 =
   maximum
     . uncurry map
     . (&&&) scenicScore (points . length)
-    . map (map (read . pure))
+    . map (map digitToInt)
 
 points :: Int -> [(Int, Int)]
 points size = [(x, y) | x <- [0 .. size - 1], y <- [0 .. size - 1]]
 
-isVisible :: [[Int]] -> (Int, Int) -> Bool
+isVisible :: Grid Int -> Pos -> Bool
 isVisible grid (x, y) =
   let (l, n : r) = splitAt y $ grid !! x
       (t, _ : b) = splitAt x $ map (!! y) grid
    in any ((n >) . maximum . (n - 1 :)) [l, r, t, b]
 
-scenicScore :: [[Int]] -> (Int, Int) -> Int
+scenicScore :: Grid Int -> Pos -> Int
 scenicScore grid (x, y) =
   let (l, n : r) = splitAt y $ grid !! x
       (t, _ : b) = splitAt x $ map (!! y) grid
