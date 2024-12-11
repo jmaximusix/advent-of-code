@@ -1,5 +1,6 @@
 module Day09 (part1, part2) where
 
+import Data.Char (digitToInt)
 import Data.List (find, partition)
 import Data.List.Extra (chunksOf)
 import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
@@ -18,7 +19,7 @@ part2 input = fst $ foldl moveAndChecksum (0, spaces) files
     f ((fs, sp), idx) (fid, [l, s]) = (((idx, (fid, l)) : fs, sp ++ [(idx + l, s)]), idx + l + s)
 
 parseChunks :: [String] -> [[Int]]
-parseChunks = chunksOf 2 . (++ [0]) . map (\x -> read [x]) . head
+parseChunks = chunksOf 2 . (++ [0]) . map digitToInt . head
 
 moveAndChecksum :: (Int, [(Int, Int)]) -> (Int, (Int, Int)) -> (Int, [(Int, Int)])
 moveAndChecksum (acc, spaces) (fidx, f@(_, fl))
