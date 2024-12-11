@@ -18,11 +18,11 @@ import qualified Day13
 import qualified Day14
 import qualified Day15
 import qualified Day16
--- import qualified Day17
--- import qualified Day18
--- import qualified Day19
--- import qualified Day20
--- import qualified Day21
+import qualified Day17
+import qualified Day18
+import qualified Day19
+import qualified Day20
+import qualified Day21
 -- import qualified Day22
 -- import qualified Day23
 -- import qualified Day24

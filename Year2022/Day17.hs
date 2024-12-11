@@ -1,4 +1,6 @@
-module Day17 (solution17) where
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+
+module Day17 (part1, part2) where
 
 import Data.List.Extra (chunksOf)
 import Data.Maybe (fromJust)
@@ -6,17 +8,23 @@ import Data.Set (Set, member)
 import qualified Data.Set as Set (empty, filter, findMax, fromList, map, union)
 import Linear.V2 (V2 (..))
 
-solution17 :: IO ()
-solution17 = do
-  myline <- head . lines <$> readFile "input17"
-  let n = 1000000000000
-  let dirs = cycle $ parseInput myline
-  let f x = returnMaxY $ fst $ foldl dropShape (Set.empty, dirs) $ take x shapes
-  let period = fromJust $ findPeriod (Set.empty, dirs, [], 5) shapes
-  let pdiff = f (2 * period) - f period
-  let a = f period - pdiff
-  print $ f 2022
-  print $ f ((n - a) `mod` period + a) + ((n - a) `div` period) * pdiff
+part1, part2 :: [String] -> Int
+part1 = solveForSmallN 2022
+part2 = solveForLargeN 1000000000000
+
+solveForSmallN :: Int -> [String] -> Int
+solveForSmallN n input = returnMaxY . fst . foldl dropShape (Set.empty, cycle . parseInput . head $ input) $ take n shapes
+
+solveForLargeN :: Int -> [String] -> Int
+solveForLargeN n input = f n' + periodcount * pdiff
+  where
+    f x = solveForSmallN x input
+    dirs = cycle . parseInput . head $ input
+    period = fromJust $ findPeriod (Set.empty, dirs, [], 5) shapes
+    pdiff = f (2 * period) - f period
+    offset = f period - pdiff
+    periodcount = (n - offset) `div` period
+    n' = (n - offset) `mod` period + offset
 
 type Pos = V2 Int
 

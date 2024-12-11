@@ -1,14 +1,14 @@
-module Day21 (solution21) where
+module Day21 (part1, part2) where
 
 import Data.Map (Map)
 import qualified Data.Map as Map (empty, insert, (!))
 
-solution21 :: IO ()
-solution21 = do
-  mylines <- lines <$> readFile "input21"
-  let tree = buildTree "root" $ foldl (\m l -> uncurry Map.insert (parseLine l) m) Map.empty mylines
-  print $ evalTree tree
-  print $ solveForHumn tree
+part1, part2 :: [String] -> Int
+part1 = evalTree . getTree
+part2 = solveForHumn . getTree
+
+getTree :: [String] -> MonkeyTree
+getTree = buildTree "root" . foldl (\m l -> uncurry Map.insert (parseLine l) m) Map.empty
 
 data MonkeyTree = Full MonkeyTree Char MonkeyTree | Half Int MonkeyTree | Leaf String Int deriving (Show)
 
