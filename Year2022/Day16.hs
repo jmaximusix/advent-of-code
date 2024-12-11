@@ -1,20 +1,15 @@
-{-# LANGUAGE LambdaCase #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
-{-# HLINT ignore "Redundant bracket" #-}
+{-# OPTIONS_GHC -Wno-incomplete-record-updates #-}
 
 module Day16 (part1, part2) where
 
-import Algorithm.Search (aStarAssoc, bfs, dijkstraAssoc)
-import Combinatorics (variate)
-import Data.List (partition)
-import Data.List.Extra (minimumOn, splitOn)
+import Algorithm.Search (bfs, dijkstra)
+import Data.List (delete, sort)
+import Data.List.Extra (maximumOn, splitOn)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, (!))
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, mapMaybe)
 import Data.Set (Set)
-import qualified Data.Set as Set (delete, fromList, map, toList)
-import Debug.Trace (traceShow)
+import qualified Data.Set as Set (delete, empty, fromList, map, toList)
 
 type Valve = (Int, Int)
 
@@ -22,62 +17,60 @@ type Cost = Int
 
 type DistanceMap = Map (Set Int) Int
 
-data Position = Ready Int | InTransit Valve Int deriving (Show, Eq, Ord)
+-- (pos, available time the entity has left)
+type Entity = (Int, Int)
 
-data State
-  = State
-      { pos :: [Position],
-        remaining :: Set Valve,
-        pressure :: Int,
-        time :: Int
-      }
-  | Done Int
+data State = State
+  { entities :: [Entity],
+    remaining :: Set Valve,
+    pressure :: Int
+  }
   deriving (Show, Eq, Ord)
 
 part1, part2 :: [String] -> Int
-part1 input = (\(Done x) -> x) $ last path
+part1 input = pressure $ last path
   where
-    Just (_, path) = dijkstraAssoc (next dmap) (\case Done _ -> True; _ -> False) (State [Ready start] valves 0 30)
-    -- Just (_, path) = aStarAssoc (next dmap) (heuristic dmap) (\case Done _ -> True; _ -> False) (State start valves 0 30)
+    Just (_, path) = dijkstra (next dmap) (cost dmap) (null . entities) (State [(start, 30)] valves 0)
     (dmap, valves, start) = parseValves input
-part2 = undefined
+part2 input = pressure $ last path
+  where
+    Just (_, path) = dijkstra (next dmap) (cost dmap) (null . entities) (State [(start, 26), (start, 26)] valves 0)
+    (dmap, valves, start) = parseValves input
 
-next :: DistanceMap -> State -> [(State, Cost)]
+next :: DistanceMap -> State -> [State]
 next adj state
-  | null (remaining state) = [(Done (pressure state), 0)]
-  | otherwise = undefined
+  | null soos = [State [] Set.empty (pressure state)]
+  | otherwise = soos
   where
-    (moving, ready) = partition inTransit $ skipWaiting $ pos state
-    newgoals = [zipWith (\(Ready l) v -> InTransit v l) vs ready | vs <- variate (length ready) $ Set.toList (remaining state)]
+    soos = map (maximumOn pressure . moveTo adj state) . Set.toList . remaining $ state
 
-inTransit :: Position -> Bool
-inTransit (InTransit _ _) = True
-inTransit _ = False
-
-skipWaiting :: [Position] -> [Position]
-skipWaiting ps
-  | all inTransit ps = map skip ps
-  | otherwise = ps
+moveTo :: DistanceMap -> State -> Valve -> [State]
+moveTo adj (State es r p) v@(vl, f)
+  | null entityandpressure = [State [] r p]
+  | otherwise = [State (sort entities') r' (p + f') | (entities', f') <- entityandpressure]
   where
-    min = minimum $ map (\(InTransit _ t) -> t) ps
-    skip (InTransit l t) = let t' = t - min in if t' > 0 then InTransit l t' else Ready l
+    r' = v `Set.delete` r
+    entityandpressure = mapMaybe (\e -> (\dt -> ((vl, dt) : delete e es, f * dt)) <$> timeAfterReaching adj vl e) es
 
-move :: DistanceMap -> State -> [Valve] -> (State, Cost)
-move adj (State l r p t) vs
-  | t' > 0 = (State l' (Set.delete (l', f) r) (p + f * t') t', cost)
-  | otherwise = (Done p, cost)
+maxAchievablePressure :: DistanceMap -> State -> Int
+maxAchievablePressure adj (State es r p) = p + sum (Set.map (\(v, f) -> safemax (mapMaybe (fmap (* f) . timeAfterReaching adj v) es)) r)
   where
-    dt = dist adj l l' + 1
-    cost = min dt t * sum (Set.map snd r)
-    soos = zipWith (\(Ready l'', (l', f)) -> let dt = dist adj l'' l' + 1 in InTransit ()) p vs
-    t' = t - dt
+    safemax xs
+      | null xs = 0
+      | otherwise = maximum xs
 
-heuristic :: DistanceMap -> State -> Cost
-heuristic _ (Done _) = 0
-heuristic adj (State l r _ t) = sum $ Set.map (\(l', f) -> (t - (dist adj l l' + 1)) * f) r
+cost :: DistanceMap -> State -> State -> Cost
+cost adj s1 s2 = maxAchievablePressure adj s1 - maxAchievablePressure adj s2
+
+timeAfterReaching :: DistanceMap -> Int -> Entity -> Maybe Int
+timeAfterReaching adj l' (l, t)
+  | dt > 0 = Just dt
+  | otherwise = Nothing
+  where
+    dt = t - dist adj l l' - 1
 
 dist :: DistanceMap -> Int -> Int -> Int
-dist adj (Ready l) (Ready l') = adj Map.! Set.fromList [l, l']
+dist adj l l' = adj Map.! Set.fromList [l, l']
 
 parseValves :: [String] -> (DistanceMap, Set Valve, Int)
 parseValves lines' = (Map.fromList distmap, Set.fromList valves, start)
