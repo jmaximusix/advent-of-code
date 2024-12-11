@@ -45,7 +45,14 @@ solve minutes (adj, vs, start) =
         $ state
 
 goAndOpenValve :: DistanceMap -> State -> Valve -> Maybe State
-goAndOpenValve adj (State es r p) v@(vl, f) = (\(e, t) -> State (sortOn (negate . snd) ((vl, t) : delete e es)) (delete v r) (p + t * f)) <$> fastestToOpen adj vl es
+goAndOpenValve adj (State es r p) v@(vl, f) =
+  ( \(e, t) ->
+      State
+        (sortOn (negate . snd) ((vl, t) : delete e es))
+        (delete v r)
+        (p + t * f)
+  )
+    <$> fastestToOpen adj vl es
 
 fastestToOpen :: DistanceMap -> Int -> [Entity] -> Maybe (Entity, Int)
 fastestToOpen adj l' =
