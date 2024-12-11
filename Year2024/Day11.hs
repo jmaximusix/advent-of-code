@@ -2,7 +2,7 @@
 
 module Day11 (part1, part2) where
 
-import qualified Data.Map as Map (empty, foldlWithKey, fromList, insertWith, toList)
+import qualified Data.Map.Strict as Map (empty, foldl, foldlWithKey, fromList, insertWith)
 import GHC.Num (integerLogBase)
 
 part1, part2 :: [String] -> Int
@@ -10,7 +10,7 @@ part1 = solve 25
 part2 = solve 75
 
 solve :: Int -> [String] -> Int
-solve n = sum . map snd . Map.toList . blink n . Map.fromList . map ((,1) . read) . words . head
+solve n = Map.foldl (+) 0 . blink n . Map.fromList . map ((,1) . read) . words . head
   where
     blink 0 stones = stones
     blink n' stones = Map.foldlWithKey update Map.empty . blink (n' - 1) $ stones
