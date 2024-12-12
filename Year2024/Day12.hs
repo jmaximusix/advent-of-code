@@ -1,57 +1,42 @@
 module Day12 (part1, part2) where
 
-import Data.List (nub, sort)
-import qualified Data.Map.Strict as Map (Map, empty, foldl, foldlWithKey, insert, insertWith, lookup)
-import qualified Data.Set as Set (Set, difference, filter, findMin, fromList, singleton, toAscList, toList, union)
-import Debug.Trace (traceShow, traceShowId)
-import Geometry (Direction (D, L, R, U), Grid, Pos, getGridElementSafe, neighborTo, neighbors, turn, zipPoints)
+import Advent (Part (..))
+import qualified Data.Map.Strict as Map (Map, fromList, lookup, lookupMin, withoutKeys, (!))
+import Data.Maybe (fromJust)
+import qualified Data.Set as Set (difference, foldl, fromList, singleton, union)
+import Geometry (Direction (D, L, R, U), Grid, Pos, neighborTo, neighbors, turn, zipPoints)
 
 part1, part2 :: Grid Char -> Int
-part1 input = Map.foldl (\acc (a, perim) -> acc + a * perim) 0 $ areasAndPerimeters input
-part2 input = Map.foldl (\acc (a, edgecount) -> acc + a * edgecount) 0 $ areasAndPerimeters input
+part1 = processRegions Part1 0 . Map.fromList . zipPoints
+part2 = processRegions Part2 0 . Map.fromList . zipPoints
 
-areasAndPerimeters :: Grid Char -> Map.Map RegionKey (Int, Int)
-areasAndPerimeters input = snd $ foldl (update input) (Map.empty, Map.empty) $ zipPoints input
-
-type RegionKey = Pos
-
-type KeyMap = Map.Map Pos RegionKey
-
-getAndUpdateRegionKey :: Grid Char -> KeyMap -> (Pos, Char) -> (RegionKey, KeyMap)
-getAndUpdateRegionKey grid regionmap (p1, c) = case maybekey of
-  Just key -> (key, regionmap)
-  Nothing -> (newregionkey, foldl (\m v -> Map.insert v newregionkey m) regionmap $ Set.toList newregionset)
+processRegions :: Part -> Int -> Map.Map Pos Char -> Int
+processRegions part acc map'
+  | null map' = acc
+  | otherwise = processRegions part acc' (map' `Map.withoutKeys` region)
   where
-    maybekey = Map.lookup p1 regionmap
-    newregionset = go $ Set.singleton p1
-    newregionkey = Set.findMin newregionset
-    go :: Set.Set Pos -> Set.Set Pos
-    go ps
-      | (not . null) (next `Set.difference` ps) = go $ ps `Set.union` next
+    acc' = case part of
+      Part1 -> acc + (area * perim)
+      Part2 -> acc + (area * newedges)
+    area = length region
+    perim = Set.foldl (\acc'' p -> acc'' + perimeter p) 0 region
+    perimeter p = 4 - length (filter ((== Just (map' Map.! p)) . (`Map.lookup` map')) $ neighbors p)
+    newedges = Set.foldl (\acc'' p -> acc'' + countNewEdges map' (p, map' Map.! p)) 0 region
+    region = findregion $ Set.singleton (fst $ fromJust $ Map.lookupMin map')
+    findregion ps
+      | (not . null) (next `Set.difference` ps) = findregion $ ps `Set.union` next
       | otherwise = ps
       where
-        next = Set.fromList $ concatMap (filter ((== Just c) . getGridElementSafe grid) . neighbors) ps
+        next = Set.fromList $ concatMap (\p -> filter ((== Just (map' Map.! p)) . (`Map.lookup` map')) . neighbors $ p) ps
 
-hasNewEdge :: Direction -> Grid Char -> (Pos, Char) -> Bool
+hasNewEdge :: Direction -> Map.Map Pos Char -> (Pos, Char) -> Bool
 hasNewEdge dir grid (p, c) = not direct && (not before || diag)
   where
-    d' = case dir of
-      L -> U
-      U -> L
-      R -> U
-      D -> L
+    d' = turn R dir
     [direct, before, diag] =
       map
-        ((== Just c) . getGridElementSafe grid . (\f -> f p))
+        ((== Just c) . (`Map.lookup` grid) . (\f -> f p))
         [neighborTo dir, neighborTo d', neighborTo dir . neighborTo d']
 
-countNewEdges :: Grid Char -> (Pos, Char) -> Int
+countNewEdges :: Map.Map Pos Char -> (Pos, Char) -> Int
 countNewEdges grid s = length $ filter (\d -> hasNewEdge d grid s) [L, R, U, D]
-
-update :: Grid Char -> (KeyMap, Map.Map RegionKey (Int, Int)) -> (Pos, Char) -> (KeyMap, Map.Map RegionKey (Int, Int))
-update grid (regionkeys, acc) (p, c) = (regionkeys', Map.insertWith combine key (1, dperim) acc)
-  where
-    (key, regionkeys') = getAndUpdateRegionKey grid regionkeys (p, c)
-    dperim = 4 - length (filter ((== Just c) . getGridElementSafe grid) $ neighbors p)
-    -- dperim = countNewEdges grid (p, c)
-    combine (a1, p1) (a2, p2) = (a1 + a2, p1 + p2)
