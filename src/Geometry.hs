@@ -17,9 +17,6 @@ type Grid a = [[a]]
 
 type Pos = (Int, Int)
 
-toV2 :: Pos -> V2 Int
-toV2 (x, y) = V2 x y
-
 toPos :: V2 Int -> Pos
 toPos (V2 x y) = (x, y)
 
