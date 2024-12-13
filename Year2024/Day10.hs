@@ -15,5 +15,5 @@ trailHeads = Map.keys . Map.filter (== '0')
 trailScore :: ([VecPos] -> [VecPos]) -> GridMap Char -> VecPos -> Int
 trailScore nubfunc g start = length (go '9')
   where
-    go '0' = [start]
+    go '0' = pure start
     go n = nubfunc $ concatMap (filter ((== Just n) . flip Map.lookup g) . neighbors) (go (pred n))
