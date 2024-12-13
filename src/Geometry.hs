@@ -2,7 +2,6 @@ module Geometry where
 
 import Data.List (elemIndex)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
-import Linear (V2 (V2))
 import MyLib (replace)
 
 type Range = (Int, Int)
@@ -16,9 +15,6 @@ data Orientation = H | V deriving (Show, Ord, Eq)
 type Grid a = [[a]]
 
 type Pos = (Int, Int)
-
-toPos :: V2 Int -> Pos
-toPos (V2 x y) = (x, y)
 
 replace2d :: (Int, Int) -> a -> Grid a -> Grid a
 replace2d (x, y) new grid = replace y (replace x new (grid !! y)) grid
