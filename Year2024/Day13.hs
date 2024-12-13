@@ -1,36 +1,24 @@
 module Day13 (part1, part2) where
 
-import Data.List.Extra (chunksOf, splitOn)
+import Control.Lens ((^.))
+import Data.List.Extra (chunksOf)
 import Data.Maybe (mapMaybe)
-import Data.Tuple.Extra (third3)
-import Linear.V2 (V2 (V2))
+import Data.Tuple.Extra (second)
+import Linear (M22, V2 (V2), det22, _x)
+import MyLib (readNumbers, tup2)
 
 part1, part2 :: [String] -> Int
-part1 = sum . mapMaybe solve . parseInput
-part2 = sum . mapMaybe (solve . third3 (fmap (+ 10000000000000))) . parseInput
+part1 = sum . mapMaybe solveLes . parseInput
+part2 = sum . mapMaybe (solveLes . second (fmap (+ 10000000000000))) . parseInput
 
-solve :: (V2 Int, V2 Int, V2 Int) -> Maybe Int
-solve (V2 ax ay, V2 bx by, V2 tx ty)
-  | enumerator `mod` denominator /= 0 = Nothing
-  | aenum `mod` adenom /= 0 = Nothing
-  | otherwise = Just $ b + 3 * aenum `div` adenom
+solveLes :: (M22 Int, V2 Int) -> Maybe Int
+solveLes (m@(V2 a b), t) =
+  safeDiv (det22 (V2 a t)) (det22 m)
+    >>= (\b' -> (\a' -> 3 * a' + b') <$> safeDiv ((t ^. _x) - b' * (b ^. _x)) (a ^. _x))
   where
-    enumerator = tx * ay - ty * ax
-    denominator = bx * ay - ax * by
-    b = enumerator `div` denominator
-    aenum = tx - b * bx
-    adenom = ax
+    safeDiv e d
+      | e `mod` d == 0 = Just $ e `div` d
+      | otherwise = Nothing
 
-saveDiv :: Int -> Int -> Maybe Int
-saveDiv a b
-  | a `mod` b == 0 = Just $ a `div` b
-  | otherwise = Nothing
-
-parseInput :: [String] -> [(V2 Int, V2 Int, V2 Int)]
-parseInput lines' = map parseMachine machines
-  where
-    parseMachine [a, b, c] = (parseButton a 2 '+', parseButton b 2 '+', parseButton c 1 '=')
-    parseButton s n delim = V2 (read $ init x') (read y')
-      where
-        [x', y'] = map ((!! 1) . splitOn [delim]) $ drop n $ words s
-    machines = map (take 3) $ chunksOf 4 lines'
+parseInput :: [String] -> [(M22 Int, V2 Int)]
+parseInput = map ((\[a, b, t] -> (V2 a b, t)) . map (uncurry V2 . tup2 . readNumbers) . take 3) . chunksOf 4

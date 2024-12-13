@@ -1,6 +1,8 @@
 module MyLib where
 
 import Advent (Day, Part (Part1, Part2), mkDay_)
+import Data.Char (isDigit)
+import Data.List.Extra (groupOnKey)
 import Data.Time.Calendar (toGregorian)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.LocalTime
@@ -35,6 +37,10 @@ modifyAt i f list = take i list ++ (f (list !! i) : drop (i + 1) list)
 
 deleteAt :: Int -> [a] -> [a]
 deleteAt i list = take i list ++ drop (i + 1) list
+
+-- reads continuous digits from strings, e.g. "abc123def456" -> [123, 456]
+readNumbers :: String -> [Int]
+readNumbers = map (read . snd) . filter fst . groupOnKey isDigit
 
 tup2 :: [a] -> (a, a)
 tup2 [a, b] = (a, b)
