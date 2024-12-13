@@ -1,11 +1,11 @@
 module Day14 (part1, part2) where
 
-import Advent (Part (Part1, Part2))
 import Data.List (find)
 import Data.List.Extra (splitOn)
 import Data.Maybe (fromJust, isNothing)
 import Data.Set (Set, member)
 import qualified Data.Set as Set (fromList, insert, map, unions)
+import MyLib (Part (..))
 
 part1, part2 :: [String] -> Int
 part1 = solve Part1

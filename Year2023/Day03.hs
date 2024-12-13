@@ -4,7 +4,7 @@ import Data.Char (isDigit)
 import Data.List (nub)
 import Data.List.Extra (chunksOf)
 import Data.Maybe (catMaybes, fromJust, isJust, mapMaybe)
-import Geometry (Grid, Pos, getGridElementWithDefault, neighborsOct, pointList)
+import MyLib.Geometry (Grid, Pos, getGridElementWithDefault, neighborsOct, pointList)
 
 part1, part2 :: Grid Char -> Int
 part1 grid = (sum . mapMaybe (maybePartNumber grid) . pointList) grid

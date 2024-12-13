@@ -1,63 +1,36 @@
-module Geometry (DirectionV, dir, directDirs, turn90L, DirectionOct (..), Grid, GridMap, Pos, VecPos, asGridMap, gridElementsSame, neighborTo, neighborsV, turn, turn90R, zipPoints) where
+module MyLib.Geometry
+  ( Grid,
+    dimensions,
+    Pos,
+    getGridElementWithDefault,
+    neighborsOct,
+    pointList,
+    getGridElement,
+    getGridElementSafe,
+    Direction (..),
+    index2d,
+    invertDir,
+    neighborTo,
+    replace2d,
+    zipPoints,
+    goNSteps,
+    isInside,
+    turn,
+    tcabDist,
+    neighbors,
+    Range,
+    intersect,
+  )
+where
 
 import Control.Applicative (liftA2)
-import Data.Bifunctor (first)
-import Data.Function (on)
 import Data.List (elemIndex)
-import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust, fromMaybe, isNothing)
-import Linear (V2 (V2), (!*))
-import MyLib (replace)
+import MyLib.Utils (replace)
 
 type Range = (Int, Int)
 
 data Direction = L | U | R | D deriving (Show, Ord, Eq, Read)
-
-type DirectionV = V2 Int
-
-data DirectionOct = N | NE | E | SE | S | SW | W | NW deriving (Show, Ord, Eq, Read)
-
-dir :: DirectionOct -> DirectionV
-dir enumval = case enumval of
-  N -> V2 0 (-1)
-  NE -> V2 1 (-1)
-  E -> V2 1 0
-  SE -> V2 1 1
-  S -> V2 0 1
-  SW -> V2 (-1) 1
-  W -> V2 (-1) 0
-  NW -> V2 (-1) (-1)
-
-type VecPos = V2 Int
-
-type GridMap a = Map.Map VecPos a
-
-turn90L :: DirectionV -> DirectionV
-turn90L = (V2 (dir S) (dir W) !*)
-
-turn90R :: DirectionV -> DirectionV
-turn90R = (V2 (dir N) (dir E) !*)
-
-asGridMap :: Grid a -> GridMap a
-asGridMap = Map.fromList . liftA2 zip vecPoints concat
-
-directDirs :: [DirectionV]
-directDirs = map dir [N, E, S, W]
-
-octDirs :: [DirectionV]
-octDirs = map dir [N, NE, E, SE, S, SW, W, NW]
-
-neighborsV :: VecPos -> [VecPos]
-neighborsV = flip map directDirs . (+)
-
-neighborsOctV :: VecPos -> [VecPos]
-neighborsOctV = flip map octDirs . (+)
-
-vecPoints :: Grid a -> [VecPos]
-vecPoints g = let (xdim, ydim) = dimensions g in [V2 x y | y <- [0 .. ydim - 1], x <- [0 .. xdim - 1]]
-
-gridElementsSame :: (Eq a) => GridMap a -> VecPos -> VecPos -> Bool
-gridElementsSame grid = (==) `on` (`Map.lookup` grid)
 
 data Orientation = H | V deriving (Show, Ord, Eq)
 

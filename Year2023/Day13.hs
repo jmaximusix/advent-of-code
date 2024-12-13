@@ -2,7 +2,7 @@ module Day13 (part1, part2) where
 
 import Data.List.Extra (splitOn, transpose)
 import Data.Maybe (fromJust, mapMaybe)
-import Geometry (Grid)
+import MyLib.Geometry (Grid)
 
 part1, part2 :: Grid Char -> Int
 part1 = sum . map (checkAllSymmetries 0) . parseInput

@@ -1,9 +1,8 @@
 module Day05 (part1, part2) where
 
-import Advent (Part (Part1, Part2))
 import Data.Bifunctor (bimap)
 import Data.Maybe (mapMaybe)
-import MyLib (replace)
+import MyLib (Part (..), replace)
 import Text.Read (readMaybe)
 
 part1, part2 :: [String] -> String

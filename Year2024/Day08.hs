@@ -4,9 +4,9 @@ import Combinatorics (variate)
 import Data.List (sortOn)
 import Data.List.Extra (groupOn)
 import qualified Data.Set as Set (empty, fromList, union)
-import Geometry (Grid, isInside, zipPoints)
 import Linear (V2 (V2))
 import MyLib (tup2)
+import MyLib.Geometry (Grid, isInside, zipPoints)
 
 part1, part2 :: Grid Char -> Int
 part1 = solve (\(a, b) -> [2 * a - b])

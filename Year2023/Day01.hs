@@ -1,8 +1,8 @@
 module Day01 (part1, part2) where
 
-import Advent (Part (Part1, Part2))
 import Data.Char (digitToInt, isDigit)
 import Data.List (elemIndex, find, isPrefixOf)
+import MyLib (Part (..))
 
 part1, part2 :: [String] -> Int
 part1 = sum . map (calibrationValue Part1)

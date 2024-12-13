@@ -4,7 +4,7 @@ import Data.List (nub)
 import qualified Data.Set as Set
 import Debug.Trace (trace, traceShow, traceShowId)
 import qualified GHC.Float as Set
-import Geometry
+import MyLib.Geometry
 import Numeric (readHex)
 
 part1, part2 :: [String] -> Int

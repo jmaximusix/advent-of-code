@@ -4,13 +4,13 @@ import Data.Char (digitToInt)
 import Data.List (find, partition)
 import Data.List.Extra (chunksOf)
 import Data.Maybe (catMaybes, fromJust, isJust, isNothing)
-import MyLib (deleteAt, replace)
+import MyLib (count, deleteAt, replace)
 
 part1, part2 :: [String] -> Int
 part1 input = sum (map (\(i, Just fid) -> i * fid) untouched) + sum (zipWith (*) (map fst spaces) (reverse (catMaybes right)))
   where
     blocks = concat . zipWith (\fid [l, s] -> replicate l (Just fid) ++ replicate s Nothing) [0 ..] . parseChunks $ input
-    splitIdx = length $ filter isJust blocks
+    splitIdx = count isJust blocks
     (left, right) = splitAt splitIdx blocks
     (untouched, spaces) = partition (isJust . snd) $ zip [0 ..] left
 part2 input = fst $ foldl moveAndChecksum (0, spaces) files

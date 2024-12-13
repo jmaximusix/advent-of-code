@@ -1,10 +1,9 @@
 module Day11 (part1, part2) where
 
-import Advent (Part (Part1, Part2))
 import Data.List (sortBy)
 import Data.List.Extra (splitOn)
 import Data.Ord (Down (Down), comparing)
-import MyLib (replace)
+import MyLib (Part (..), replace)
 
 part1, part2 :: [String] -> Int
 part1 = solve Part1 20

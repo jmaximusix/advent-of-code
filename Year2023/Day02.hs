@@ -3,7 +3,7 @@ module Day02 (part1, part2) where
 import Data.Bifunctor (bimap)
 import Data.List.Extra (chunksOf)
 import qualified Data.Map as Map (Map, empty, fromList, insertWith, toList, (!))
-import GHC.Utils.Misc (capitalise)
+import MyLib (capitalise)
 
 data Color = Red | Green | Blue deriving (Show, Eq, Ord, Read)
 

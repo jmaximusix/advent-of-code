@@ -3,7 +3,7 @@ module Day10 (part1, part2) where
 import Data.Maybe (fromJust, mapMaybe)
 import qualified Data.Set as Set (Set, insert, member, singleton)
 import Data.Tuple.Extra (both)
-import Geometry
+import MyLib.Geometry
   ( Direction (..),
     Grid,
     Pos,

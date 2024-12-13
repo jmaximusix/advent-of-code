@@ -2,12 +2,12 @@
 
 module Day17 (part1, part2) where
 
-import Advent (Part (..))
 import Algorithm.Search (dijkstraAssoc)
 import Data.Char (digitToInt)
 import Data.Maybe (mapMaybe)
 import Data.Tuple.Extra (both)
-import Geometry
+import MyLib (Part (..))
+import MyLib.Geometry
   ( Direction (L, R),
     Grid,
     Pos,

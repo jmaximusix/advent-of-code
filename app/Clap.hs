@@ -1,10 +1,9 @@
 module Clap (Submit (No, Ask, Direct), parseClap) where
 
-import Advent (Day, Part, dayInt, mkDay_)
+import Advent
 import qualified Control.Monad (when)
 import Data.Char (toLower)
-import GHC.Utils.Misc (capitalise)
-import MyLib (Date, mostRecentChallenge, readPart)
+import MyLib (Date, capitalise, mostRecentChallenge, readPart)
 import Options.Applicative
   ( Parser,
     auto,

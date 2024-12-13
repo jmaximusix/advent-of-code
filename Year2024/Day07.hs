@@ -1,6 +1,6 @@
 module Day07 (part1, part2) where
 
-import Advent (Part (..))
+import MyLib (Part (..))
 
 part1, part2 :: [String] -> Int
 part1 = sum . map fst . filter (uncurry (canCreateFrom Part1)) . map parseInput

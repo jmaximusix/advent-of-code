@@ -5,7 +5,7 @@ module Day14 (part1, part2) where
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Tuple.Extra (swap)
-import Geometry
+import MyLib.Geometry
   ( Direction (..),
     Grid,
     Pos,

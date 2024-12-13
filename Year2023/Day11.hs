@@ -5,7 +5,7 @@ import Control.Arrow ((&&&))
 import Data.List (transpose)
 import qualified Data.Set as Set (Set, fromList, map, toList)
 import Data.Tuple.Extra (both, swap)
-import Geometry (Grid, Pos, tcabDist, zipPoints)
+import MyLib.Geometry (Grid, Pos, tcabDist, zipPoints)
 
 part1, part2 :: Grid Char -> Int
 part1 = solve 2

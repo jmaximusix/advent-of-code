@@ -2,7 +2,7 @@ module Day06 (part1, part2) where
 
 import Data.Maybe (fromJust, isNothing)
 import qualified Data.Set as Set (Set, delete, filter, fromList, insert, map, member)
-import Geometry (Direction (R, U), Grid, Pos, getGridElementSafe, goNSteps, index2d, isInside, replace2d, turn)
+import MyLib.Geometry (Direction (R, U), Grid, Pos, getGridElementSafe, goNSteps, index2d, isInside, replace2d, turn)
 
 part1, part2 :: Grid Char -> Int
 part1 grid = length $ fromJust $ exitPath (start, Set.fromList [start]) grid

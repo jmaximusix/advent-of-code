@@ -3,23 +3,6 @@
 module Main (main) where
 
 import Advent
-  ( AoC (AoCInput, AoCPrompt, AoCSubmit),
-    AoCOpts
-      ( AoCOpts,
-        _aCache,
-        _aForce,
-        _aSessionKey,
-        _aThrottle,
-        _aUserAgent,
-        _aYear
-      ),
-    Day,
-    Part (Part1, Part2),
-    dayInt,
-    runAoC_,
-    showSubmitRes,
-  )
-import qualified Advent as Advent.Api
 import Clap (Submit (Ask, Direct, No), parseClap)
 import Data.Char (toLower)
 import qualified Data.Map as Map (keys)
@@ -49,9 +32,9 @@ main = do
         AoCOpts
           { _aSessionKey = sessionKey,
             _aUserAgent =
-              Advent.Api.AoCUserAgent
-                { Advent.Api._auaRepo = repo,
-                  Advent.Api._auaEmail = email
+              AoCUserAgent
+                { _auaRepo = repo,
+                  _auaEmail = email
                 },
             _aYear = year,
             _aCache = Just cache_dir,

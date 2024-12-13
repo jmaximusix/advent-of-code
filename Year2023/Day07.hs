@@ -1,10 +1,10 @@
 module Day07 (part1, part2) where
 
-import Advent (Part (Part1, Part2))
 import Data.Bifunctor (bimap)
 import Data.Function (on)
 import Data.List (group, sort, sortBy)
 import Data.Ord (Down (Down), comparing)
+import MyLib (Part (..), countEq)
 
 data Card = Joker | Number Int | Jack | Queen | King | Ace deriving (Eq, Show, Ord)
 
@@ -63,4 +63,4 @@ mostCommonCards cards
   | otherwise = (first + jokers, second)
   where
     (first : second : _) = sortBy (comparing Down) (map length (group $ sort cards) ++ [0])
-    jokers = length $ filter (== Joker) cards
+    jokers = countEq Joker cards

@@ -43,7 +43,6 @@ library Year2022
     default-language: Haskell2010
     build-depends: base ^>=4.16.4.0,
         MyLib,
-        advent-of-code-api,
         template-haskell,
         extra,
         containers,
@@ -63,11 +62,9 @@ library Year2023
     default-language: Haskell2010
     build-depends: base ^>=4.16.4.0,
         MyLib,
-        advent-of-code-api,
         search-algorithms,
         template-haskell,
         containers,
-        ghc,
         combinatorial,
         extra,
     
@@ -81,14 +78,12 @@ library Year2024
     default-language: Haskell2010
     build-depends: base ^>=4.16.4.0,
         MyLib,
-        advent-of-code-api,
         search-algorithms,
         template-haskell,
         containers,
         linear,
         combinatorial,
         extra,
-        ghc,
         lens,
         regex-tdfa,
     
@@ -104,9 +99,9 @@ library Year2024
 --    For whatever reason this is necessary for the first execution otherwise TH won't register the new solutions.
 
 library MyLib
-    exposed-modules:  MyLib, TemplateHS, Geometry
+    exposed-modules:  MyLib, TemplateHS, MyLib.Geometry, MyLib.Utils, MyLib.GridV
     -- Modules included in this library but not exported.
-
+    other-modules: MyLib.ReExport
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:    base ^>=4.16.4.0,
@@ -116,6 +111,7 @@ library MyLib
         extra,
         formatting,
         containers,
+        ghc,
         time
     hs-source-dirs:   src
     default-language: Haskell2010
@@ -140,7 +136,6 @@ executable advent-of-code
         optparse-applicative,
         load-env,
         timeit,
-        ghc,
         text,
         containers
 

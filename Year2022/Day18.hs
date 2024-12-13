@@ -8,9 +8,10 @@ import qualified Data.Map as Map (empty, fromList, insert, member, toList, (!))
 import Data.Set (Set, member)
 import qualified Data.Set as Set (empty, findMax, findMin, fromList, insert, map, toList)
 import Linear.V3 (V3 (..))
+import MyLib (count)
 
 part1, part2 :: [String] -> Int
-part1 input = length $ filter (`notElem` cubes) $ map snd sides
+part1 input = count (`notElem` cubes) $ map snd sides
   where
     cubes = map parseInput input
     sides = concatMap gensides $ indexed cubes

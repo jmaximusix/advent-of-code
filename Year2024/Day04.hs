@@ -4,12 +4,13 @@ import Control.Applicative (liftA2)
 import Data.List (transpose)
 import qualified Data.Set as Set (fromList)
 import Data.Tuple.Extra (both)
-import Geometry (Grid, Pos, dimensions, getGridElement, getGridElementSafe, pointList)
+import MyLib.Geometry (Grid, Pos, dimensions, getGridElement, getGridElementSafe, pointList)
+import MyLib.Utils (count)
 import Text.Regex.TDFA ((=~))
 
 part1, part2 :: [[Char]] -> Int
 part1 input = countXmas input + countXmas (transpose input) + countXmas (diagonals input)
-part2 input = length $ filter (isMasCenterA input) (pointList input)
+part2 input = count (isMasCenterA input) (pointList input)
 
 countXmas :: [String] -> Int
 countXmas = sum . map (\l -> (l =~ "XMAS" :: Int) + (reverse l =~ "XMAS" :: Int))

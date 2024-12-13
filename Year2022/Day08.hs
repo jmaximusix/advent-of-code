@@ -2,7 +2,7 @@ module Day08 (part1, part2) where
 
 import Control.Arrow ((&&&))
 import Data.Char (digitToInt)
-import Geometry (Grid, Pos)
+import MyLib.Geometry (Grid, Pos)
 
 part1, part2 :: Grid Char -> Int
 part1 =

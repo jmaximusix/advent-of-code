@@ -7,7 +7,7 @@ import qualified Data.Map as Map
 import Data.Maybe (fromJust)
 import Data.Tuple.Extra (both)
 import Debug.Trace (traceShow, traceShowId)
-import Geometry (Range, intersect)
+import MyLib.Geometry (Range, intersect)
 
 data Part = Part {x :: Int, m :: Int, a :: Int, s :: Int} deriving (Show)
 

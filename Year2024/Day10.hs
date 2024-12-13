@@ -1,7 +1,7 @@
 module Day10 (part1, part2) where
 
 import Data.List (nub)
-import Geometry (Grid, Pos, getGridElementSafe, neighbors, zipPoints)
+import MyLib.Geometry (Grid, Pos, getGridElementSafe, neighbors, zipPoints)
 
 part1, part2 :: Grid Char -> Int
 part1 g = sum . map (trailScore g nub) . trailHeads $ g

@@ -2,8 +2,7 @@ module Day05 (part1, part2) where
 
 import Data.List (sortBy)
 import Data.List.Extra (splitOn)
-import GHC.Utils.Misc (isSortedBy)
-import MyLib (tup2)
+import MyLib (isSortedBy, tup2)
 
 type Rule = (Int, Int)
 

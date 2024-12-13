@@ -7,7 +7,7 @@ import qualified Data.Map as Map
 import Data.Maybe (fromMaybe, isNothing)
 import qualified Data.Set as Set
 import Debug.Trace (traceShow, traceShowId)
-import Geometry
+import MyLib.Geometry
 
 type Loc = (Pos, Direction)
 
