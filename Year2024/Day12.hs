@@ -1,42 +1,38 @@
 module Day12 (part1, part2) where
 
 import Advent (Part (..))
-import qualified Data.Map.Strict as Map (Map, fromList, lookup, lookupMin, withoutKeys, (!))
+import Control.Applicative (liftA2)
+import Data.Foldable.Extra (sumOn')
+import qualified Data.Map.Strict as Map (lookupMin, withoutKeys)
 import Data.Maybe (fromJust)
-import qualified Data.Set as Set (difference, foldl, fromList, singleton, union)
-import Geometry (Direction (D, L, R, U), Grid, Pos, neighborTo, neighbors, turn, zipPoints)
+import qualified Data.Set as Set (Set, difference, fromList, singleton, union)
+import Geometry (DirectionV, Grid, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighborsV, turn90R)
+import MyLib (count)
 
 part1, part2 :: Grid Char -> Int
-part1 = processRegions Part1 0 . Map.fromList . zipPoints
-part2 = processRegions Part2 0 . Map.fromList . zipPoints
+part1 = processRegions Part1 0 . asGridMap
+part2 = processRegions Part2 0 . asGridMap
 
-processRegions :: Part -> Int -> Map.Map Pos Char -> Int
-processRegions part acc map'
-  | null map' = acc
-  | otherwise = processRegions part acc' (map' `Map.withoutKeys` region)
+processRegions :: Part -> Int -> GridMap Char -> Int
+processRegions part acc grid
+  | null grid = acc
+  | otherwise = processRegions part acc' (grid `Map.withoutKeys` region)
   where
-    acc' = case part of
-      Part1 -> acc + (area * perim)
-      Part2 -> acc + (area * newedges)
-    area = length region
-    perim = Set.foldl (\acc'' p -> acc'' + perimeter p) 0 region
-    perimeter p = 4 - length (filter ((== Just (map' Map.! p)) . (`Map.lookup` map')) $ neighbors p)
-    newedges = Set.foldl (\acc'' p -> acc'' + countNewEdges map' (p, map' Map.! p)) 0 region
-    region = findregion $ Set.singleton (fst $ fromJust $ Map.lookupMin map')
-    findregion ps
-      | (not . null) (next `Set.difference` ps) = findregion $ ps `Set.union` next
-      | otherwise = ps
-      where
-        next = Set.fromList $ concatMap (\p -> filter ((== Just (map' Map.! p)) . (`Map.lookup` map')) . neighbors $ p) ps
+    acc' = acc + (length region * sumOn' f region)
+    f = case part of
+      Part1 -> (4 -) . liftA2 count (gridElementsSame grid) neighborsV
+      Part2 -> (\p -> count (hasNewEdge grid p) directDirs)
+    region = findRegion grid $ Set.singleton . fst . fromJust . Map.lookupMin $ grid
 
-hasNewEdge :: Direction -> Map.Map Pos Char -> (Pos, Char) -> Bool
-hasNewEdge dir grid (p, c) = not direct && (not before || diag)
+findRegion :: GridMap Char -> Set.Set VecPos -> Set.Set VecPos
+findRegion grid r
+  | null (next `Set.difference` r) = r
+  | otherwise = findRegion grid $ r `Set.union` next
   where
-    d' = turn R dir
-    [direct, before, diag] =
-      map
-        ((== Just c) . (`Map.lookup` grid) . (\f -> f p))
-        [neighborTo dir, neighborTo d', neighborTo dir . neighborTo d']
+    next = Set.fromList $ concatMap (liftA2 filter (gridElementsSame grid) neighborsV) r
 
-countNewEdges :: Map.Map Pos Char -> (Pos, Char) -> Int
-countNewEdges grid s = length $ filter (\d -> hasNewEdge d grid s) [L, R, U, D]
+hasNewEdge :: GridMap Char -> VecPos -> DirectionV -> Bool
+hasNewEdge grid p dir = not (f dir) && (not (f dir') || f (dir + dir'))
+  where
+    f = gridElementsSame grid p
+    dir' = turn90R dir

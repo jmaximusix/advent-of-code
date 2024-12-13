@@ -42,5 +42,11 @@ deleteAt i list = take i list ++ drop (i + 1) list
 readNumbers :: String -> [Int]
 readNumbers = map (read . snd) . filter fst . groupOnKey isDigit
 
+countEq :: (Eq a) => a -> [a] -> Int
+countEq x = count (== x)
+
+count :: (a -> Bool) -> [a] -> Int
+count f = length . filter f
+
 tup2 :: [a] -> (a, a)
 tup2 [a, b] = (a, b)

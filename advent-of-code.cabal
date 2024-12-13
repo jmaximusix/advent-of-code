@@ -31,16 +31,8 @@ library Year2015
     default-language: Haskell2010
     build-depends: base ^>=4.16.4.0,
         MyLib,
-        advent-of-code-api,
         template-haskell,
-        extra,
-        containers,
-        combinatorial,
-        linear,
-        ilist,
-        search-algorithms,
-        split
-    
+
     ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
 
 library Year2022
@@ -123,6 +115,7 @@ library MyLib
         linear,
         extra,
         formatting,
+        containers,
         time
     hs-source-dirs:   src
     default-language: Haskell2010
