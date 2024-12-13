@@ -1,6 +1,7 @@
 module Day13 (part1, part2) where
 
 import Control.Lens ((^.))
+import Control.Monad (guard)
 import Data.List.Extra (chunksOf)
 import Data.Maybe (mapMaybe)
 import Data.Tuple.Extra (second)
@@ -16,9 +17,7 @@ solveLes (m@(V2 a b), t) =
   safeDiv (det22 (V2 a t)) (det22 m)
     >>= (\b' -> (\a' -> 3 * a' + b') <$> safeDiv ((t ^. _x) - b' * (b ^. _x)) (a ^. _x))
   where
-    safeDiv e d
-      | e `mod` d == 0 = Just $ e `div` d
-      | otherwise = Nothing
+    safeDiv e d = guard (d /= 0 && e `mod` d == 0) >> Just (e `div` d)
 
 parseInput :: [String] -> [(M22 Int, V2 Int)]
 parseInput = map ((\[a, b, t] -> (V2 a b, t)) . map (uncurry V2 . tup2 . readNumbers) . take 3) . chunksOf 4
