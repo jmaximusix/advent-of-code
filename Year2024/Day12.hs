@@ -7,7 +7,7 @@ import Data.Maybe (fromJust)
 import qualified Data.Set as Set (Set, difference, fromList, member, singleton, unions)
 import Data.Tuple.Extra (dupe)
 import MyLib (Grid, Part (..), count)
-import MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90L)
+import MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R)
 
 part1, part2 :: Grid Char -> Int
 part1 = processRegions Part1 0 . asGridMap
@@ -35,5 +35,5 @@ findRegion grid (edge, acc)
 hasNewEdge :: Set.Set VecPos -> VecPos -> Direction -> Bool
 hasNewEdge region p dir = not (f dir) && (not (f dir') || f (dir + dir'))
   where
-    dir' = turn90L dir
+    dir' = turn90R dir
     f = (`Set.member` region) . (p +)
