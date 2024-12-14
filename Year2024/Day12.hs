@@ -4,7 +4,7 @@ import Control.Applicative (liftA2)
 import Data.Foldable.Extra (sumOn')
 import qualified Data.Map.Strict as Map (lookupMin, withoutKeys)
 import Data.Maybe (fromJust)
-import qualified Data.Set as Set (Set, difference, fromList, member, singleton, unions)
+import qualified Data.Set as Set (Set, difference, fromList, member, singleton, union)
 import Data.Tuple.Extra (dupe)
 import MyLib (Grid, Part (..), count)
 import MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R)
@@ -27,7 +27,7 @@ processRegions part acc grid
 findRegion :: GridMap Char -> (Set.Set VecPos, Set.Set VecPos) -> Set.Set VecPos
 findRegion grid (edge, acc)
   | null new = acc
-  | otherwise = findRegion grid (new, Set.unions [acc, new])
+  | otherwise = findRegion grid (new, Set.union acc new)
   where
     new = next `Set.difference` acc
     next = Set.fromList (concatMap (liftA2 filter (gridElementsSame grid) neighbors) edge)

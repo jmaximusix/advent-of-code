@@ -6,7 +6,7 @@ import Data.List.Extra (chunksOf)
 import Data.Maybe (mapMaybe)
 import Data.Tuple.Extra (second)
 import Linear (M22, V2 (V2), det22, _x)
-import MyLib (readNumbers, tup2)
+import MyLib.Utils (readNumbers, tup2)
 
 part1, part2 :: [String] -> Int
 part1 = sum . mapMaybe solveLes . parseInput
