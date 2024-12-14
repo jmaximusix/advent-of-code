@@ -1,9 +1,9 @@
-module MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90L) where
+module MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R) where
 
 import Control.Applicative (liftA2)
 import Data.Function (on)
 import qualified Data.Map as Map
-import Linear (V2 (V2), (!*))
+import Linear (V2 (V2), negated, perp)
 import MyLib.Geometry (Grid, dimensions)
 
 type Direction = V2 Int
@@ -26,10 +26,10 @@ type VecPos = V2 Int
 type GridMap a = Map.Map VecPos a
 
 turn90L :: Direction -> Direction
-turn90L = (V2 (dir S) (dir W) !*)
+turn90L = perp . negated
 
 turn90R :: Direction -> Direction
-turn90R = (V2 (dir N) (dir E) !*)
+turn90R = perp
 
 asGridMap :: Grid a -> GridMap a
 asGridMap = Map.fromList . liftA2 zip vecPoints concat
