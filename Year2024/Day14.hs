@@ -1,31 +1,39 @@
 module Day14 (part1, part2) where
 
-import Debug.Trace (traceShowId)
-import Linear (V2 (..))
-import MyLib (count, readNumbers)
+import Control.Lens ((^.))
+import Data.List.Extra (maximumOn)
+import Data.Maybe (mapMaybe)
+import Linear (V2 (..), _x, _y)
 import MyLib.GridV (VecPos)
-
-part1, part2 :: [String] -> Int
-part1 = countQs . map (move 100 . parseInput)
-part2 i = traceShow (iterate move 1 $ map parseInput i) 9
-
-countQs :: [VecPos] -> Int
-countQs i =
-  product $
-    map
-      (`count` i)
-      [ \(V2 x y) -> (x > 0) && (y > 0),
-        \(V2 x y) -> (x < 0) && (y > 0),
-        \(V2 x y) -> (x < 0) && (y < 0),
-        \(V2 x y) -> (x > 0) && (y < 0)
-      ]
-
-move :: Int -> Robot -> VecPos
-move n (pos, vel) = (\(V2 a b) -> V2 ((a `mod` 101) - 50) ((b `mod` 103) - 51)) $ pos + ((n *) <$> vel)
-
--- move n (pos, vel) = (\(V2 a b) -> V2 ((a `mod` 11) - 5) ((b `mod` 7) - 3)) $ pos + ((n *) <$> vel)
+import MyLib.Utils (countAll, readNumbers)
 
 type Robot = (VecPos, VecPos)
+
+part1, part2 :: [String] -> Int
+part1 = product . countAll . mapMaybe (quadrant . move 100 . parseInput)
+-- (-50) is t in the equation s*101 + t*103 = 1, solved with extended Euclidean algorithm
+part2 = (\(a, b) -> ((a - b) * (-50) * 103 + b) `mod` (101 * 103)) . axisClusters . map parseInput
+
+quadrant :: VecPos -> Maybe Int
+quadrant (V2 x y)
+  | x > 50 && y > 51 = Just 1
+  | x < 50 && y > 51 = Just 2
+  | x < 50 && y < 51 = Just 3
+  | x > 50 && y < 51 = Just 4
+  | otherwise = Nothing
+
+axisClusters :: [Robot] -> (Int, Int)
+axisClusters robots = (cluster _x 101, cluster _y 103)
+  where
+    cluster xory len =
+      fst
+        . maximumOn snd
+        . zip [1 ..]
+        . map (maximum . countAll . \x -> map ((^. xory) . move x) robots)
+        $ [1 .. len]
+
+move :: Int -> Robot -> VecPos
+move n (pos, vel) = (\(V2 a b) -> V2 (a `mod` 101) (b `mod` 103)) $ pos + ((n *) <$> vel)
 
 parseInput :: String -> Robot
 parseInput input = (V2 a b, V2 c d)
