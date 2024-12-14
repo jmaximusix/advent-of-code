@@ -27,7 +27,7 @@ processRegions part acc grid
 findRegion :: GridMap Char -> (Set.Set VecPos, Set.Set VecPos) -> Set.Set VecPos
 findRegion grid (edge, acc)
   | null new = acc
-  | otherwise = findRegion grid (new, Set.unions [acc, next])
+  | otherwise = findRegion grid (new, Set.unions [acc, new])
   where
     new = next `Set.difference` acc
     next = Set.fromList (concatMap (liftA2 filter (gridElementsSame grid) neighbors) edge)
