@@ -11,8 +11,8 @@ type Robot = (VecPos, VecPos)
 
 part1, part2 :: [String] -> Int
 part1 = product . countAll . mapMaybe (quadrant . move 100 . parseInput)
--- (-50) is t in the equation s*101 + t*103 = 1, solved with extended Euclidean algorithm
-part2 = (\(a, b) -> ((a - b) * (-50) * 103 + b) `mod` (101 * 103)) . axisClusters . map parseInput
+-- 51 is s in the equation s*101 + t*103 = 1, solved with extended Euclidean algorithm
+part2 = (\(a, b) -> ((b - a) * 51 * 101 + a) `mod` (101 * 103)) . axisClusters . map parseInput
 
 quadrant :: VecPos -> Maybe Int
 quadrant (V2 x y)
