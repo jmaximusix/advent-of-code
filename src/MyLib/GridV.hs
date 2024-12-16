@@ -1,4 +1,4 @@
-module MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R, DirectionOct (..), dir) where
+module MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R, DirectionOct (..), dir, turn90L) where
 
 import Control.Applicative (liftA2)
 import Data.Function (on)
