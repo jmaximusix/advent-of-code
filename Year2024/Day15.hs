@@ -103,9 +103,6 @@ tryMove2Vertical (grid, p) dir'
     nowempty = affected `Set.difference` moved
     grid' = Set.foldl (\g p' -> Map.adjust (const (fromJust $ Map.lookup p' grid)) (p' + dir') g) grid affected
 
--- allAffectedVertical :: GridMap Char -> Set.Set VecPos -> Direction -> Set.Set VecPos
--- allAffectedVertical grid dir'
-
 allAffectedVertical :: GridMap Char -> Direction -> (Set.Set VecPos, Set.Set VecPos) -> Set.Set VecPos
 allAffectedVertical grid d' (edge, acc) | traceShow (edge, acc) False = undefined
 allAffectedVertical grid d' (edge, acc)
