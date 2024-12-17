@@ -1,4 +1,4 @@
-module MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R, DirectionOct (..), dir, turn90L) where
+module MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R, DirectionOct (..), dir, turn90L, pullPois) where
 
 import Control.Applicative (liftA2)
 import Data.Function (on)
@@ -51,3 +51,9 @@ vecPoints g = let (xdim, ydim) = dimensions g in [V2 x y | y <- [0 .. ydim - 1],
 
 gridElementsSame :: (Eq a) => GridMap a -> VecPos -> VecPos -> Bool
 gridElementsSame grid = (==) `on` (`Map.lookup` grid)
+
+pullPois :: (Eq a) => [a] -> a -> GridMap a -> (GridMap a, [VecPos])
+pullPois pois filler grid = (grid', pois')
+  where
+    pois' = map (\poi -> head . Map.keys . Map.filter (== poi) $ grid) pois
+    grid' = foldl (flip (Map.adjust (const filler))) grid pois'
