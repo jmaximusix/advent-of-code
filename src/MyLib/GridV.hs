@@ -1,4 +1,19 @@
-module MyLib.GridV (Direction, GridMap, VecPos, asGridMap, directDirs, gridElementsSame, neighbors, turn90R, DirectionOct (..), dir, turn90L, pullPois) where
+module MyLib.GridV
+  ( Direction,
+    GridMap,
+    VecPos,
+    asGridMap,
+    directDirs,
+    gridElementsSame,
+    neighbors,
+    turn90R,
+    DirectionOct (..),
+    dir,
+    turn90L,
+    pullPois,
+    withinBounds,
+  )
+where
 
 import Control.Applicative (liftA2)
 import Data.Function (on)
@@ -57,3 +72,6 @@ pullPois pois filler grid = (grid', pois')
   where
     pois' = map (\poi -> head . Map.keys . Map.filter (== poi) $ grid) pois
     grid' = foldl (flip (Map.adjust (const filler))) grid pois'
+
+withinBounds :: VecPos -> (Int, Int) -> Bool
+withinBounds (V2 x y) (xdim, ydim) = x >= 0 && y >= 0 && x <= xdim && y <= ydim
