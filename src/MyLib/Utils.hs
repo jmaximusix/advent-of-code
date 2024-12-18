@@ -1,4 +1,4 @@
-module MyLib.Utils (count, countEq, replace, tup2, deleteAt, readNumbers, countAll) where
+module MyLib.Utils (count, countEq, replace, tup2, deleteAt, readNumbers, countAll, binarySearch) where
 
 import Data.Char (isDigit)
 import Data.List.Extra (groupOnKey)
@@ -28,3 +28,12 @@ tup2 [a, b] = (a, b)
 
 countAll :: (Ord a) => [a] -> Map.Map a Int
 countAll = Map.fromListWith (+) . flip zip (repeat 1)
+
+-- returns the index of the first n that satisfies the predicate
+binarySearch :: (Int -> Bool) -> Int -> Int -> Int
+binarySearch p lo hi
+  | lo == hi = lo
+  | p mid = binarySearch p lo mid
+  | otherwise = binarySearch p (mid + 1) hi
+  where
+    mid = lo + (hi - lo) `div` 2
