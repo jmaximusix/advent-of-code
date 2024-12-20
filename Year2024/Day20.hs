@@ -1,34 +1,34 @@
+{-# LANGUAGE TupleSections #-}
+
 module Day20 (part1, part2) where
 
 import Algorithm.Search (bfs, pruning)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, mapMaybe)
 import qualified Data.Set as Set
-import Debug.Trace (traceShow, traceShowId)
+import Linear (V2 (V2))
 import MyLib.GridV
 
 part1, part2 :: [String] -> Int
-part1 input = fastestwithCheats
+part1 = solve 2
+part2 = solve 20
+
+solve :: Int -> [String] -> Int
+solve cheattime input = length cheats
   where
     (grid, [start, end]) = pullPois "SE" '.' $ asGridMap input
-    nocheats = length $ fromJust $ bfs (neighbors `pruning` (\v -> Map.lookup v grid == Just '#')) (== end) start
-    fastestwithCheats = repeatWhileshorterThanN (nocheats - 100) grid Set.empty start end
-part2 = undefined
+    nocheats = Map.fromList $ zip (end : fromJust (bfs (neighbors `pruning` (\v -> Map.lookup v grid == Just '#')) (== start) end)) [0 ..]
+    cheats = foldl (countCheats cheattime nocheats) Set.empty $ Map.keys nocheats
 
-repeatWhileshorterThanN :: Int -> GridMap Char -> Set.Set [VecPos] -> VecPos -> VecPos -> Int
-repeatWhileshorterThanN n grid previous start end
-  | length res <= n = repeatWhileshorterThanN n grid allcheats start end
-  | otherwise = length $ traceShowId previous
+countCheats :: Int -> Map.Map VecPos Int -> Set.Set (VecPos, VecPos) -> VecPos -> Set.Set (VecPos, VecPos)
+countCheats ct nocheats cheats p = foldl (\c ((v, _), _) -> (p, v) `Set.insert` c) cheats successful
   where
-    allcheats = traceShow (length res, n) $ cheats `Set.insert` previous
-    res = fromJust $ bfs (nextwithcheats grid `pruning` (\(_, (_, c)) -> c `Set.member` previous)) ((== end) . fst) (start, (2, []))
-    (_, (_, cheats)) = last $ res
-
-nextwithcheats :: GridMap Char -> (VecPos, (Int, [VecPos])) -> [(VecPos, (Int, [VecPos]))]
-nextwithcheats grid (pos, (cheats, cheatloc)) = map (\v -> (v, remainingcheats v)) $ filter (\v -> cheats > 1 || (Map.lookup v grid == Just '.')) $ neighbors pos
-  where
-    remainingcheats v
-      | cheats == 0 = (0, cheatloc)
-      | cheats == 1 = (0, v : cheatloc)
-      | Map.lookup v grid == Just '#' = (cheats - 1, v : cheatloc)
-      | otherwise = (cheats, cheatloc)
+    successful =
+      filter (\((v, d), i) -> (nocheats Map.! p) - i - d >= 100 && (p, v) `Set.notMember` cheats) $
+        mapMaybe (\a@(v, _) -> (a,) <$> Map.lookup v nocheats) candidates
+    candidates =
+      [ (p + V2 dx dy, abs dx + abs dy)
+        | dx <- [-ct .. ct],
+          dy <- [-ct .. ct],
+          abs dx + abs dy <= ct
+      ]

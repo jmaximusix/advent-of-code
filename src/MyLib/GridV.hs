@@ -12,6 +12,7 @@ module MyLib.GridV
     turn90L,
     pullPois,
     withinBounds,
+    tcabDistV,
   )
 where
 
@@ -19,7 +20,7 @@ import Control.Applicative (liftA2)
 import Data.Function (on)
 import qualified Data.Map as Map
 import Linear (V2 (V2), negated, perp)
-import MyLib.Geometry (Grid, dimensions)
+import MyLib.Geometry (Grid, dimensions, tcabDist)
 
 type Direction = V2 Int
 
@@ -75,3 +76,6 @@ pullPois pois filler grid = (grid', pois')
 
 withinBounds :: VecPos -> (Int, Int) -> Bool
 withinBounds (V2 x y) (xdim, ydim) = x >= 0 && y >= 0 && x <= xdim && y <= ydim
+
+tcabDistV :: VecPos -> VecPos -> Int
+tcabDistV (V2 x1 y1) (V2 x2 y2) = abs (x1 - x2) + abs (y1 - y2)
