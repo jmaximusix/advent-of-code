@@ -3,6 +3,7 @@
 module Day21 (part1, part2) where
 
 import Algorithm.Search (bfs, dijkstraAssoc, dijkstraAssocM, pruning)
+import Combinatorics (variate)
 import Data.Bifunctor (first)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust, isNothing, mapMaybe)
@@ -17,7 +18,18 @@ part1 input = sum $ map (uncurry (*) . first (solve arrowkeys numpad 2) . parseI
   where
     numpad = Map.fromList $ map swap [('7', V2 0 0), ('8', V2 1 0), ('9', V2 2 0), ('4', V2 0 1), ('5', V2 1 1), ('6', V2 2 1), ('1', V2 0 2), ('2', V2 1 2), ('3', V2 2 2), ('0', V2 1 3), ('A', V2 2 3)]
     arrowkeys = Map.fromList $ map swap [('^', V2 1 0), ('A', V2 2 0), ('<', V2 0 1), ('v', V2 1 1), ('>', V2 2 1)]
-part2 input = traceShow (mapad $ traceShowId $ moves (V2 0 0) (V2 2 3)) 0
+part2 input = traceShow (map (seqLen . robotifySeq numpad 2) $ variate 2 "0123456789A") 0
+  where
+    keylist = [('7', V2 0 0), ('8', V2 1 0), ('9', V2 2 0), ('4', V2 0 1), ('5', V2 1 1), ('6', V2 2 1), ('1', V2 0 2), ('2', V2 1 2), ('3', V2 2 2), ('0', V2 1 3), ('A', V2 2 3)]
+    numpad' = Map.fromList $ map swap keylist
+    numpad = Map.fromList keylist
+    arrowkeys = Map.fromList $ map swap [('^', V2 1 0), ('A', V2 2 0), ('<', V2 0 1), ('v', V2 1 1), ('>', V2 2 1)]
+
+-- [25,12,19,26,13,20,27,14,21,10,21,10,11,12,19,20,13,20,21,22,16,18,10,21,12,19,22,13,20,21,21,19,18,22,21,12,23,22,13,16,22,16,21,22,10,11,12,19,20,23,17,21,16,21,18,10,21,12,19,22,22,22,21,16,19,18,22,21,12,17,23,17,22,23,16,21,22,10,11,24,18,22,17,22,21,16,21,18,10,23,23,23,22,17,22,21,16,19,18,18,18,26,21,12,27,22,13,28,23,14]
+-- [25,12,19,26,13,20,27,14,21,10,21,10,11,12,19,20,13,20,21,22,16,18,10,21,12,19,22,13,20,17,21,19,18,22,21,12,23,22,13,16,22,16,17,18,10,11,12,19,20,23,17,21,16,17,18,10,21,12,19,18,22,22,21,16,19,18,22,21,12,17,23,17,18,19,16,17,18,10,11,24,18,22,17,18,21,16,17,18,10,19,23,23,22,17,22,21,16,19,18,18,18,26,21,12,27,22,13,28,23,14]
+-- part2 input = sum $ map (uncurry (*) . first (seqLen . robotifySeq numpad 2) . parseInput) input
+--   where
+--     numpad = Map.fromList [('7', V2 0 0), ('8', V2 1 0), ('9', V2 2 0), ('4', V2 0 1), ('5', V2 1 1), ('6', V2 2 1), ('1', V2 0 2), ('2', V2 1 2), ('3', V2 2 2), ('0', V2 1 3), ('A', V2 2 3)]
 
 solveC :: Map.Map VecPos Char -> Map.Map VecPos Char -> Int -> Char -> Char -> Int
 solveC apad numpad n r1c c = fst $ fromJust $ dijkstraAssoc (filter (not . wrongAnswer c . fst) . next apad numpad) (rightAnswer c) state0
@@ -25,8 +37,24 @@ solveC apad numpad n r1c c = fst $ fromJust $ dijkstraAssoc (filter (not . wrong
     r1loc = fst $ Map.findMin $ Map.filter (== r1c) numpad
     state0 = State r1loc 0 $ replicate n $ V2 2 0
 
+-- v<<A>>^A<A>A<A>vAA^Av<AAA>^A
+-- v<<A>>^A<A>AvA<^AA>A<vAAA>^A
+
+-- v<A<AA>>^A<AA>vA^Av<<A>>^AvA^Av<<A>>^AvA<A>^AA<A>Av<A<A>>^AAA<A>vA^A
+-- <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+
 parseInput :: String -> (String, Int)
 parseInput s = ('A' : s, read $ init s)
+
+printSeq :: Sequence -> String
+printSeq (Seq xs) = concatMap printSeq xs
+printSeq (Nt n c) = replicate n c
+printSeq (Press n) = replicate n 'A'
+
+seqLen :: Sequence -> Int
+seqLen (Press n) = n
+seqLen (Nt n _) = n
+seqLen (Seq xs) = sum $ map seqLen xs
 
 solve :: Map.Map VecPos Char -> Map.Map VecPos Char -> Int -> String -> Int
 solve apad numpad n [a, b] = solveC apad numpad n a b
@@ -41,7 +69,11 @@ data State
   | Output Char
   deriving (Show, Eq, Ord)
 
-data Sequence = Seq [Char] | Press Int
+data Sequence
+  = Seq [Sequence]
+  | Nt Int Char
+  | Press Int
+  deriving (Show, Eq, Ord)
 
 wrongAnswer :: Char -> State -> Bool
 wrongAnswer c (Output o) = o /= c
@@ -63,35 +95,41 @@ simulateInput apad numpad state@(State r1 i rs) c
     mr' = Map.lookup (r + toDir c) apad
     r = rs !! i
 
-mapad :: [(Int, Char)] -> [[(Int, Char)]]
-mapad [(_, 'v')] = [[(1, 'v'), (1, '<')], [(1, '>'), (1, '^')]]
-mapad [(_, '^')] = [[(1, '<')], [(1, '>')]]
-mapad [(_, '>')] = [[(1, 'v')], [(1, '^')]]
-mapad [(_, '<')] = [[(1, 'v'), (2, '<')], [(2, '>'), (1, '^')]]
-mapad [(_, '>'), (_, 'v')] = [[(1, 'v')], [(1, '<')], [(1, '>'), (1, '^')]]
-mapad [(_, '>'), (_, '^')] = [[(1, '<')], [(1, '>'), (1, 'v')], [(1, '^')]]
-mapad [(_, '<'), (_, 'v')] = [[(1, 'v'), (2, '<')], [(1, '>')], [(1, '>'), (1, '^')]]
-mapad [(_, '<'), (_, '^')] = [[(1, 'v'), (2, '<')], [(1, '>'), (1, '^')], [(1, '>')]]
-mapad [(_, '^'), (_, '<')] = [[(1, '<')], [(1, 'v'), (1, '<')], [(2, '>'), (1, '^')]]
-mapad [(_, 'v'), (_, '<')] = [[(1, 'v'), (1, '<')], [(1, '<')], [(2, '>'), (1, '^')]]
+mapad p@(Press _) = p
+mapad (Nt a 'v') = Seq [Seq [Nt 1 'v', Nt 1 '<'], Press a, Seq [Nt 1 '>', Nt 1 '^']]
+mapad (Nt a '^') = Seq [Nt 1 '<', Press a, Nt 1 '>']
+mapad (Nt a '>') = Seq [Nt 1 'v', Press a, Nt 1 '^']
+mapad (Nt a '<') = Seq [Seq [Nt 1 'v', Nt 2 '<'], Press a, Seq [Nt 2 '>', Nt 1 '^']]
+mapad (Seq [Nt a '>', Nt b 'v']) = Seq [Nt 1 'v', Press a, Nt 1 '<', Press b, Seq [Nt 1 '>', Nt 1 '^']]
+mapad (Seq [Nt a '>', Nt b '^']) = Seq [Nt 1 '<', Press a, Seq [Nt 1 '>', Nt 1 'v'], Press b, Nt 1 '^']
+mapad (Seq [Nt a '<', Nt b 'v']) = Seq [Seq [Nt 1 'v', Nt 2 '<'], Press a, Nt 1 '>', Press b, Seq [Nt 1 '>', Nt 1 '^']]
+mapad (Seq [Nt a '<', Nt b '^']) = Seq [Seq [Nt 1 'v', Nt 2 '<'], Press a, Seq [Nt 1 '>', Nt 1 '^'], Press b, Nt 1 '>']
+mapad (Seq [Nt a '^', Nt b '<']) = Seq [Nt 1 '<', Press a, Seq [Nt 1 'v', Nt 1 '<'], Press b, Seq [Nt 2 '>', Nt 1 '^']]
+mapad (Seq [Nt a 'v', Nt b '<']) = Seq [Seq [Nt 1 'v', Nt 1 '<'], Press a, Nt 1 '<', Press b, Seq [Nt 2 '>', Nt 1 '^']]
+mapad (Seq xs) = Seq $ map mapad xs
 
-moves :: VecPos -> VecPos -> [(Int, Char)]
+moves :: VecPos -> VecPos -> Sequence
 moves v1@(V2 _ y1) v2@(V2 x2 _)
-  | x2 == 0 && y1 == 3 = [(ay, '^'), (ax, '<')]
+  | x2 == 0 && y1 == 3 = Seq [Nt ay '^', Nt ax '<']
   | otherwise = case dv of
-      V2 0 1 -> [(ay, 'v')]
-      V2 0 (-1) -> [(ay, '^')]
-      V2 1 0 -> [(ax, '>')]
-      V2 (-1) 0 -> [(ax, '<')]
-      V2 1 1 -> [(ax, '>'), (ay, 'v')]
-      V2 1 (-1) -> [(ax, '>'), (ay, '^')]
-      V2 (-1) 1 -> [(ax, '<'), (ay, 'v')]
-      V2 (-1) (-1) -> [(ax, '<'), (ay, '^')]
+      V2 0 1 -> Nt ay 'v'
+      V2 0 (-1) -> Nt ay '^'
+      V2 1 0 -> Nt ax '>'
+      V2 (-1) 0 -> Nt ax '<'
+      V2 1 1 -> Seq [Nt ax '>', Nt ay 'v']
+      V2 1 (-1) -> Seq [Nt ax '>', Nt ay '^']
+      V2 (-1) 1 -> Seq [Nt ax '<', Nt ay 'v']
+      V2 (-1) (-1) -> Seq [Nt ax '<', Nt ay '^']
   where
     (V2 x y) = v2 - v1
     dv = V2 (signum x) (signum y)
     ax = abs x
     ay = abs y
+
+robotifySeq :: Map.Map Char VecPos -> Int -> [Char] -> Sequence
+robotifySeq numpad 0 [a, b] = Seq [moves (numpad Map.! a) (numpad Map.! b), Press 1]
+robotifySeq numpad 0 (a : b : rest) = Seq [robotifySeq numpad 0 [a, b], robotifySeq numpad 0 (b : rest)]
+robotifySeq np n cs = mapad $ robotifySeq np (n - 1) cs
 
 pressbetween :: Map.Map VecPos Char -> Map.Map VecPos Char -> State -> Maybe State
 -- pressbetween _ _ (State _ i rs) | traceShow (i, rs) False = undefined
@@ -113,27 +151,3 @@ toDir '^' = dir N
 toDir 'v' = dir S
 toDir '<' = dir W
 toDir '>' = dir E
-
--- keypadNeighbors :: Map.Map Char (V2 Int) -> Char -> [Char]
--- keypadNeighbors pad c = Map.keys $ Map.filter (\p' -> tcabDistV p p' == 1) pad
---   where
---     p = pad Map.! c
-
--- transitionCostOnOuter :: Map.Map Char (V2 Int) -> Char -> Char -> Int
--- transitionCostOnOuter arrows pos target = tcabDistV (arrows Map.! pos) (arrows Map.! target)
-
--- transitionCostOnSecond :: Map.Map Char (V2 Int) -> Char -> Char -> Char -> Int
--- transitionCostOnSecond arrows r3 r2 target = fst $ fromJust $ dijkstraAssoc (map (\c -> (c, transitionCostOnOuter arrows r3 c)) . keypadNeighbors arrows) (== target) r2
-
--- nextOnSecond :: Char -> ((Char, Char) Bool)-> [(((Char, Char), Bool), Int)]
--- nextOnSecond otw ((r3, r2),visitedotw)
-
--- translateArrowMoveToArrow:: Map.Map Char (V2 Int) -> Char -> Char -
--- translateArrowMoveToArrow pad p1 p2
-
--- transitionCostOnInner
-
--- A A A A A A A A X
--- moving up 1
--- A A A A A A A U X
--- A A A A A A L
