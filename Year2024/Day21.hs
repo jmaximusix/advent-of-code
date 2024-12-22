@@ -3,7 +3,6 @@ module Day21 (part1, part2) where
 import Data.Bifunctor (bimap, first)
 import qualified Data.Map.Strict as Map
 import Linear (V2 (V2))
-import MyLib.GridV (VecPos)
 
 part1, part2 :: [String] -> Int
 part1 = solve 2
@@ -30,7 +29,7 @@ solve n = sum . map (uncurry (*) . first (fst . chainNRobots n . map (numpad Map
           ('A', V2 2 3)
         ]
 
-chainNRobots :: Int -> [VecPos] -> (Int, Map.Map [Char] Int)
+chainNRobots :: Int -> [V2 Int] -> (Int, Map.Map [Char] Int)
 chainNRobots 0 [a, b] = bimap (+ 1) (`Map.singleton` 1) (keypad a b)
 chainNRobots 0 (a : b : r) = bimap sum (Map.unionsWith (+)) $ unzip [chainNRobots 0 [a, b], chainNRobots 0 (b : r)]
 chainNRobots n keysToPress = Map.foldlWithKey update (total, Map.empty) moves
@@ -54,7 +53,7 @@ arrowpad "<^" = (6, ["v<", ">^", ">"])
 arrowpad "^<" = (6, ["<", "v<", ">^"])
 arrowpad "v<" = (6, ["<v", "<", ">^"])
 
-keypad :: VecPos -> VecPos -> (Int, String)
+keypad :: V2 Int -> V2 Int -> (Int, String)
 keypad v1@(V2 x1 y1) v2@(V2 x2 y2)
   | x2 == 0 && y1 == 3 = (d, "^<")
   | x1 == 0 && y2 == 3 = (d, ">v")
