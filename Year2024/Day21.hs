@@ -7,6 +7,7 @@ import Data.Bifunctor (first)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust, isNothing, mapMaybe)
 import Data.Tuple (swap)
+import Debug.Trace (traceShow)
 import Linear (V2 (V2))
 import MyLib.GridV
 import MyLib.Utils
@@ -16,10 +17,7 @@ part1 input = sum $ map (uncurry (*) . first (solve arrowkeys numpad 2) . parseI
   where
     numpad = Map.fromList $ map swap [('7', V2 0 0), ('8', V2 1 0), ('9', V2 2 0), ('4', V2 0 1), ('5', V2 1 1), ('6', V2 2 1), ('1', V2 0 2), ('2', V2 1 2), ('3', V2 2 2), ('0', V2 1 3), ('A', V2 2 3)]
     arrowkeys = Map.fromList $ map swap [('^', V2 1 0), ('A', V2 2 0), ('<', V2 0 1), ('v', V2 1 1), ('>', V2 2 1)]
-part2 input = sum $ map (uncurry (*) . first (solve arrowkeys numpad 25) . parseInput) input
-  where
-    numpad = Map.fromList $ map swap [('7', V2 0 0), ('8', V2 1 0), ('9', V2 2 0), ('4', V2 0 1), ('5', V2 1 1), ('6', V2 2 1), ('1', V2 0 2), ('2', V2 1 2), ('3', V2 2 2), ('0', V2 1 3), ('A', V2 2 3)]
-    arrowkeys = Map.fromList $ map swap [('^', V2 1 0), ('A', V2 2 0), ('<', V2 0 1), ('v', V2 1 1), ('>', V2 2 1)]
+part2 input = traceShow (moves (V2 0 0) (V2 2 3)) 0
 
 solveC :: Map.Map VecPos Char -> Map.Map VecPos Char -> Int -> Char -> Char -> Int
 solveC apad numpad n r1c c = fst $ fromJust $ dijkstraAssoc (filter (not . wrongAnswer c . fst) . next apad numpad) (rightAnswer c) state0
@@ -43,6 +41,8 @@ data State
   | Output Char
   deriving (Show, Eq, Ord)
 
+data Tree = PressNAfter Int [Tree] | Leaf Int Char
+
 wrongAnswer :: Char -> State -> Bool
 wrongAnswer c (Output o) = o /= c
 wrongAnswer _ _ = False
@@ -62,6 +62,35 @@ simulateInput apad numpad state@(State r1 i rs) c
   where
     mr' = Map.lookup (r + toDir c) apad
     r = rs !! i
+
+apad :: [(Int, Char)] -> [[(Int, Char)]]
+apad [(_, 'v')] = [[(1, 'v'), (1, '<')], [(1, '>'), (1, '^')]]
+apad [(_, '^')] = [[(1, '<')], [(1, '>')]]
+apad [(_, '>')] = [[(1, 'v')], [(1, '^')]]
+apad [(_, '<')] = [[(1, 'v'), (2, '<')], [(2, '>'), (1, '^')]]
+apad [(_, '>'), (_, 'v')] = [[(1, 'v')], [(1, '<')], [(1, '>'), (1, '^')]]
+apad [(_, '>'), (_, '^')] = [[(1, '<')], [(1, '>'), (1, 'v')], [(1, '^')]]
+apad [(_, '<'), (_, 'v')] = [[(1, 'v'), (2, '<')], [(1, '>')], [(1, '>'), (1, '^')]]
+apad [(_, '<'), (_, '^')] = [[(1, 'v'), (2, '<')], [(1, '>'), (1, '^')], [(1, '>')]]
+apad [(_, '^'), (_, '<')] = [[(1, '<')], [(1, 'v'), (1, '<')], [(2, '>'), (1, '^')]]
+
+moves :: VecPos -> VecPos -> [(Int, Char)]
+moves v1@(V2 _ y1) v2@(V2 x2 _)
+  | x2 == 0 && y1 == 3 = [(ay, '^'), (ax, '<')]
+  | otherwise = case dv of
+      V2 0 1 -> [(ay, 'v')]
+      V2 0 (-1) -> [(ay, '^')]
+      V2 1 0 -> [(ax, '>')]
+      V2 (-1) 0 -> [(ax, '<')]
+      V2 1 1 -> [(ax, '>'), (ay, 'v')]
+      V2 1 (-1) -> [(ax, '>'), (ay, '^')]
+      V2 (-1) 1 -> [(ax, '<'), (ay, 'v')]
+      V2 (-1) (-1) -> [(ax, '<'), (ay, '^')]
+  where
+    (V2 x y) = v2 - v1
+    dv = V2 (signum x) (signum y)
+    ax = abs x
+    ay = abs y
 
 pressbetween :: Map.Map VecPos Char -> Map.Map VecPos Char -> State -> Maybe State
 -- pressbetween _ _ (State _ i rs) | traceShow (i, rs) False = undefined
