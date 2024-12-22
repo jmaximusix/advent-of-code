@@ -18,9 +18,13 @@ part1 input = sum $ map (uncurry (*) . first (solve arrowkeys numpad 2) . parseI
   where
     numpad = Map.fromList $ map swap [('7', V2 0 0), ('8', V2 1 0), ('9', V2 2 0), ('4', V2 0 1), ('5', V2 1 1), ('6', V2 2 1), ('1', V2 0 2), ('2', V2 1 2), ('3', V2 2 2), ('0', V2 1 3), ('A', V2 2 3)]
     arrowkeys = Map.fromList $ map swap [('^', V2 1 0), ('A', V2 2 0), ('<', V2 0 1), ('v', V2 1 1), ('>', V2 2 1)]
-part2 input = traceShow (map (seqLen . robotifySeq numpad 2) $ variate 2 "0123456789A") 0
+part2 input = sum solution
   where
+    solution = map (uncurry (*) . first (seqLen . robotifySeq numpad 25) . parseInput) input
     keylist = [('7', V2 0 0), ('8', V2 1 0), ('9', V2 2 0), ('4', V2 0 1), ('5', V2 1 1), ('6', V2 2 1), ('1', V2 0 2), ('2', V2 1 2), ('3', V2 2 2), ('0', V2 1 3), ('A', V2 2 3)]
+    troubleshoot = filter (\s -> length s /= 6) $ zipWith (\(a, b) d -> if b == d then a ++ " top" else a ++ " passt nicht: " ++ show b ++ ", " ++ show d) correct incorrect
+    correct = map (\x -> (x, solve arrowkeys numpad' 5 x)) $ variate 2 "0123456789A"
+    incorrect = map (seqLen . robotifySeq numpad 5) $ variate 2 "0123456789A"
     numpad' = Map.fromList $ map swap keylist
     numpad = Map.fromList keylist
     arrowkeys = Map.fromList $ map swap [('^', V2 1 0), ('A', V2 2 0), ('<', V2 0 1), ('v', V2 1 1), ('>', V2 2 1)]
@@ -39,9 +43,11 @@ solveC apad numpad n r1c c = fst $ fromJust $ dijkstraAssoc (filter (not . wrong
 
 -- v<<A>>^A<A>A<A>vAA^Av<AAA>^A
 -- v<<A>>^A<A>AvA<^AA>A<vAAA>^A
+-- v<<A>>^A<A>AvA<^AA>A<vAAA>^A
 
 -- v<A<AA>>^A<AA>vA^Av<<A>>^AvA^Av<<A>>^AvA<A>^AA<A>Av<A<A>>^AAA<A>vA^A
 -- <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
+-- <vA<AA>>^AvAA<^A>Av<<A>>^AvA^A<vA>^Av<<A>^A>AAvA^Av<<A>A>^AAAvA<^A>A
 
 parseInput :: String -> (String, Int)
 parseInput s = ('A' : s, read $ init s)
@@ -96,28 +102,31 @@ simulateInput apad numpad state@(State r1 i rs) c
     r = rs !! i
 
 mapad p@(Press _) = p
-mapad (Nt a 'v') = Seq [Seq [Nt 1 'v', Nt 1 '<'], Press a, Seq [Nt 1 '>', Nt 1 '^']]
+mapad (Nt a 'v') = Seq [Seq [Nt 1 '<', Nt 1 'v'], Press a, Seq [Nt 1 '^', Nt 1 '>']]
 mapad (Nt a '^') = Seq [Nt 1 '<', Press a, Nt 1 '>']
 mapad (Nt a '>') = Seq [Nt 1 'v', Press a, Nt 1 '^']
 mapad (Nt a '<') = Seq [Seq [Nt 1 'v', Nt 2 '<'], Press a, Seq [Nt 2 '>', Nt 1 '^']]
-mapad (Seq [Nt a '>', Nt b 'v']) = Seq [Nt 1 'v', Press a, Nt 1 '<', Press b, Seq [Nt 1 '>', Nt 1 '^']]
-mapad (Seq [Nt a '>', Nt b '^']) = Seq [Nt 1 '<', Press a, Seq [Nt 1 '>', Nt 1 'v'], Press b, Nt 1 '^']
-mapad (Seq [Nt a '<', Nt b 'v']) = Seq [Seq [Nt 1 'v', Nt 2 '<'], Press a, Nt 1 '>', Press b, Seq [Nt 1 '>', Nt 1 '^']]
+mapad (Seq [Nt a 'v', Nt b '>']) = Seq [Seq [Nt 1 '<', Nt 1 'v'], Press a, Nt 1 '>', Press b, Nt 1 '^']
+mapad (Seq [Nt a '>', Nt b 'v']) = Seq [Nt 1 'v', Press a, Nt 1 '<', Press b, Seq [Nt 1 '^', Nt 1 '>']]
+mapad (Seq [Nt a '>', Nt b '^']) = Seq [Nt 1 'v', Press a, Seq [Nt 1 '<', Nt 1 '^'], Press b, Nt 1 '>']
+mapad (Seq [Nt a '^', Nt b '>']) = Seq [Nt 1 '<', Press a, Seq [Nt 1 'v', Nt 1 '>'], Press b, Nt 1 '^']
+mapad (Seq [Nt a '<', Nt b 'v']) = Seq [Seq [Nt 1 'v', Nt 2 '<'], Press a, Nt 1 '>', Press b, Seq [Nt 1 '^', Nt 1 '>']]
 mapad (Seq [Nt a '<', Nt b '^']) = Seq [Seq [Nt 1 'v', Nt 2 '<'], Press a, Seq [Nt 1 '>', Nt 1 '^'], Press b, Nt 1 '>']
 mapad (Seq [Nt a '^', Nt b '<']) = Seq [Nt 1 '<', Press a, Seq [Nt 1 'v', Nt 1 '<'], Press b, Seq [Nt 2 '>', Nt 1 '^']]
-mapad (Seq [Nt a 'v', Nt b '<']) = Seq [Seq [Nt 1 'v', Nt 1 '<'], Press a, Nt 1 '<', Press b, Seq [Nt 2 '>', Nt 1 '^']]
+mapad (Seq [Nt a 'v', Nt b '<']) = Seq [Seq [Nt 1 '<', Nt 1 'v'], Press a, Nt 1 '<', Press b, Seq [Nt 2 '>', Nt 1 '^']]
 mapad (Seq xs) = Seq $ map mapad xs
 
 moves :: VecPos -> VecPos -> Sequence
-moves v1@(V2 _ y1) v2@(V2 x2 _)
+moves v1@(V2 x1 y1) v2@(V2 x2 y2)
   | x2 == 0 && y1 == 3 = Seq [Nt ay '^', Nt ax '<']
+  | x1 == 0 && y2 == 3 = Seq [Nt ay '>', Nt ax 'v']
   | otherwise = case dv of
       V2 0 1 -> Nt ay 'v'
       V2 0 (-1) -> Nt ay '^'
       V2 1 0 -> Nt ax '>'
       V2 (-1) 0 -> Nt ax '<'
-      V2 1 1 -> Seq [Nt ax '>', Nt ay 'v']
-      V2 1 (-1) -> Seq [Nt ax '>', Nt ay '^']
+      V2 1 1 -> Seq [Nt ax 'v', Nt ay '>']
+      V2 1 (-1) -> Seq [Nt ax '^', Nt ay '>']
       V2 (-1) 1 -> Seq [Nt ax '<', Nt ay 'v']
       V2 (-1) (-1) -> Seq [Nt ax '<', Nt ay '^']
   where
