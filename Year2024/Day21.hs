@@ -4,14 +4,15 @@ import Data.Bifunctor (bimap, first)
 import qualified Data.Map.Strict as Map
 import Linear (V2 (V2))
 
-part1, part2 :: [String] -> Int
+-- since my solution runs in linear time I'm using Integers just for fun and can calculate up to 10k robots in <1s
+part1, part2 :: [String] -> Integer
 part1 = solve 2
 part2 = solve 25
 
-parseInput :: String -> (String, Int)
+parseInput :: String -> (String, Integer)
 parseInput s = ('A' : s, read $ init s)
 
-solve :: Int -> [String] -> Int
+solve :: Int -> [String] -> Integer
 solve n = sum . map (uncurry (*) . first (fst . chainNRobots n . map (numpad Map.!)) . parseInput)
   where
     numpad =
@@ -29,7 +30,7 @@ solve n = sum . map (uncurry (*) . first (fst . chainNRobots n . map (numpad Map
           ('A', V2 2 3)
         ]
 
-chainNRobots :: Int -> [V2 Int] -> (Int, Map.Map [Char] Int)
+chainNRobots :: Int -> [V2 Integer] -> (Integer, Map.Map [Char] Integer)
 chainNRobots 0 [a, b] = bimap (+ 1) (`Map.singleton` 1) (keypad a b)
 chainNRobots 0 (a : b : r) = bimap sum (Map.unionsWith (+)) $ unzip [chainNRobots 0 [a, b], chainNRobots 0 (b : r)]
 chainNRobots n keysToPress = Map.foldlWithKey update (total, Map.empty) moves
@@ -39,7 +40,7 @@ chainNRobots n keysToPress = Map.foldlWithKey update (total, Map.empty) moves
       let (dacc, newmoves) = arrowpad move
        in (acc + c * dacc, foldl (\mm newm -> Map.insertWith (+) newm c mm) movemap newmoves)
 
-arrowpad :: String -> (Int, [String])
+arrowpad :: String -> (Integer, [String])
 arrowpad "v" = (4, ["<v", "^>"])
 arrowpad "^" = (2, ["<", ">"])
 arrowpad ">" = (2, ["v", "^"])
@@ -53,7 +54,7 @@ arrowpad "<^" = (6, ["v<", ">^", ">"])
 arrowpad "^<" = (6, ["<", "v<", ">^"])
 arrowpad "v<" = (6, ["<v", "<", ">^"])
 
-keypad :: V2 Int -> V2 Int -> (Int, String)
+keypad :: V2 Integer -> V2 Integer -> (Integer, String)
 keypad v1@(V2 x1 y1) v2@(V2 x2 y2)
   | x2 == 0 && y1 == 3 = (d, "^<")
   | x1 == 0 && y2 == 3 = (d, ">v")
