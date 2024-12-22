@@ -3,7 +3,7 @@ module Day19 (part1, part2) where
 import Algorithm.Search (dfs)
 import Data.List (inits, tails)
 import Data.List.Extra (splitOn)
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import Data.Maybe (isJust)
 import qualified Data.Set as Set
 

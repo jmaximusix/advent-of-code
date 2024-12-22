@@ -18,7 +18,7 @@ where
 
 import Control.Applicative (liftA2)
 import Data.Function (on)
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import Linear (V2 (V2), negated, perp)
 import MyLib.Geometry (Grid, dimensions, tcabDist)
 
