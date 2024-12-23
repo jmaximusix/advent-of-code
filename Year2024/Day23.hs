@@ -30,12 +30,14 @@ allPartiesWithChief conns =
     $ conns
 
 largestParty :: Connections -> Set String
-largestParty conns
-  | isNothing maybeparties = largestParty rest
-  | otherwise = Set.findMin $ fromJust maybeparties
+largestParty conns = solve maxsize
   where
-    maybeparties = find (not . null) $ map (partiesWithMember maxsize conns) $ Map.keys longest
-    (longest, rest) = Map.partition ((== maxsize) . length) conns
+    solve n
+      | isNothing maybeparties = solve (n - 1)
+      | otherwise = Set.findMin $ fromJust maybeparties
+      where
+        maybeparties = find (not . null) $ map (partiesWithMember n conns) $ Map.keys longest
+        longest = Map.filter ((>= n) . length) conns
     maxsize = maximum $ Map.map length conns
 
 partiesWithMember :: Int -> Connections -> String -> Set (Set String)
