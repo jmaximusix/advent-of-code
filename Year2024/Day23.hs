@@ -22,7 +22,12 @@ parseInput = foldl ins Map.empty . map (second tail . splitAt 2)
     ins' a b = Map.insertWith Set.union a (Set.singleton b)
 
 allPartiesWithChief :: Connections -> Set (Set String)
-allPartiesWithChief conns = Set.unions . map (partiesWithMember 3 conns) . filter ((== 't') . head) . Map.keys $ conns
+allPartiesWithChief conns =
+  Set.unions
+    . map (partiesWithMember 3 conns)
+    . filter ((== 't') . head)
+    . Map.keys
+    $ conns
 
 largestParty :: Connections -> Set String
 largestParty conns
