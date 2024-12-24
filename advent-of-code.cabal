@@ -29,7 +29,7 @@ library Year2015
     other-modules: Day01
     hs-source-dirs: Year2015
     default-language: Haskell2010
-    build-depends: base ^>=4.16.4.0,
+    build-depends: base ^>=4.20.0.0,
         MyLib,
         template-haskell,
 
@@ -41,7 +41,7 @@ library Year2022
     other-modules: Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09, Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19, Day20, Day21
     hs-source-dirs: Year2022
     default-language: Haskell2010
-    build-depends: base ^>=4.16.4.0,
+    build-depends: base ^>=4.20.0.0,
         MyLib,
         template-haskell,
         extra,
@@ -60,7 +60,7 @@ library Year2023
     other-modules: Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09, Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19, Day20, Day21, Day22, Day23, Day24, Day25
     hs-source-dirs: Year2023
     default-language: Haskell2010
-    build-depends: base ^>=4.16.4.0,
+    build-depends: base ^>=4.20.0.0,
         MyLib,
         search-algorithms,
         template-haskell,
@@ -76,7 +76,7 @@ library Year2024
     other-modules: Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09, Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19, Day20, Day21, Day22, Day23, Day24, Day25
     hs-source-dirs: Year2024
     default-language: Haskell2010
-    build-depends: base ^>=4.16.4.0,
+    build-depends: base ^>=4.20.0.0,
         MyLib,
         search-algorithms,
         template-haskell,
@@ -85,6 +85,7 @@ library Year2024
         combinatorial,
         extra,
         lens,
+        sbv,
         regex-tdfa,
     
     ghc-options:      -Wall -Wextra -Wno-incomplete-patterns -Wno-incomplete-uni-patterns
@@ -104,7 +105,7 @@ library MyLib
     other-modules: MyLib.ReExport
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.16.4.0,
+    build-depends:    base ^>=4.20.0.0,
         advent-of-code-api,
         template-haskell,
         linear,
@@ -125,7 +126,7 @@ executable advent-of-code
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
-        base ^>=4.16.4.0,
+        base ^>=4.20.0.0,
         MyLib,
         Year2015,
         Year2022,
