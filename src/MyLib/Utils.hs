@@ -30,9 +30,9 @@ countAll :: (Ord a) => [a] -> Map.Map a Int
 countAll = Map.fromListWith (+) . flip zip (repeat 1)
 
 -- returns smallest n that satisfies the predicate
-binarySearch :: (Int -> Bool) -> Int -> Int -> Int
+binarySearch :: (Int -> Bool) -> Int -> Int -> Maybe Int
 binarySearch p lo hi
-  | lo == hi = lo
+  | lo == hi = if p lo then Just lo else Nothing
   | p mid = binarySearch p lo mid
   | otherwise = binarySearch p (mid + 1) hi
   where

@@ -1,7 +1,6 @@
 module Day18 (part1, part2) where
 
 import Algorithm.Search (bfs, pruning)
-import Control.Applicative (liftA2)
 import Data.Maybe (fromJust, isNothing)
 import qualified Data.Set as Set
 import Linear (V2 (..))
@@ -12,7 +11,7 @@ part1 :: [String] -> Int
 part1 = fromJust . solveUntilN 1024 . blocks
 
 part2 :: [String] -> String
-part2 input = input !! pred (binarySearch (isNothing . (`solveUntilN` blocks input)) 1025 (length input))
+part2 input = input !! pred (fromJust $ binarySearch (isNothing . (`solveUntilN` blocks input)) 1025 (length input))
 
 blocks :: [String] -> [VecPos]
 blocks = map (uncurry V2 . tup2 . readNumbers)
