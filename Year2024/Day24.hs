@@ -2,15 +2,16 @@
 
 module Day24 (part1, part2) where
 
-import Data.Bits (shiftR, xor, (.&.), (.|.))
+import Control.Monad (when)
+import Data.Bits (xor, (.&.), (.|.))
 import Data.List.Extra (splitOn, uncons)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust)
-import Data.SBV (SBool, SDivisible (sMod), SInt64, Symbolic, free, isTheorem, oneIf, output, runSMT, sBools, sFalse, (.&&), (.<+>), (.<=>), (.==), (.||))
+import Data.SBV (SBool, SDivisible (sMod), SInt64, Symbolic, ThmResult, free, isTheorem, oneIf, output, prove, runSMT, sBools, sFalse, (.&&), (.<+>), (.<=>), (.==), (.>>.), (.||))
 import qualified Data.Set as Set
 import Data.Tuple.Extra (both)
 import Debug.Trace (traceShow, traceShowId)
-import MyLib (tup2)
+import MyLib (binarySearch, tup2)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf (printf)
 
@@ -31,24 +32,32 @@ asSint bs c = foldl (\acc a -> 2 * acc + (oneIf a :: SInt64)) 0 $ reverse bs'
   where
     bs' = map snd $ Map.toList $ Map.filterWithKey (\k _ -> head k == c) bs
 
-part2 :: [String] -> Bool
-part2 input = unsafePerformIO $ isTheorem $ do
-  let mappings = parseInput2 input
-  let zs' = Map.filterWithKey (\k _ -> head k == 'z') mappings
-  let zs = Map.map (solve3 mappings) zs'
-  bools <- (fmap (Map.fromList . uncurry zip) . \(a, b) -> (a,) <$> b) $ liftA2 (,) id sBools [printf "%c%02d" xy a | xy <- ['x', 'y'], a <- [0 .. 44 :: Int]]
-  return $ correctUntilN 6 bools zs
+part2 :: [String] -> String
+part2 input = show (correctUntilN 45 zs)
+  where
+    mappings = parseInput2 input
+    zs' = Map.filterWithKey (\k _ -> head k == 'z') mappings
+    wds = Map.map (wiredeps mappings) zs'
+    zs = traceShow wds $ Map.map (solve3 mappings) zs'
+    mappings3 = Map.map (solve3 mappings) mappings
+    wds' = Map.mapWithKey Set.insert wds
+    ds = Map.map deps mappings3
+    breakingAt = binarySearch (not . flip correctUntilN zs) 0 45
 
-correctUntilN :: Int -> Bools -> Map.Map String Entry3 -> Symbolic SBool
-correctUntilN n bools zs = do
+correctUntilN :: Int -> Map.Map String Entry3 -> Bool
+correctUntilN n zs = unsafePerformIO $ isTheorem $ do
+  bools <- (fmap (Map.fromList . uncurry zip) . \(a, b) -> (a,) <$> b) $ liftA2 (,) id sBools [printf "%c%02d" xy a | xy <- ['x', 'y'], a <- [0 .. 44 :: Int]]
   let zn = zs Map.! (printf "z%02d" n)
-  let control = ((asSint bools 'x' + asSint bools 'y') `shiftR` n) `sMod` 2
+  let control = isOdd $ ((asSint bools 'x' + asSint bools 'y') .>>. n) `sMod` 2
   evalzn <- evalEntry3 bools zn
-  return $ (oneIf evalzn :: SInt64) .== control
+  return $ evalzn .<=> control
+
+isOdd :: SInt64 -> SBool
+isOdd x = (x `sMod` 2) .== 1
 
 -- wd45 = wds Map.! "z45"
 -- wd7 = wds Map.! "z07"
--- -- probwrong2 = foldl Set.difference probwrongpds wds
+-- -- probwrong2 = foldl Set.difference probkpvwrongpds wds
 -- wds = Map.map (wd) zs
 -- -- probwrongpds = Set.union wd45 wd7
 -- wd = wiredeps mappings
@@ -81,36 +90,30 @@ solve m e = case e of
   where
     sol a b = both (solve m) (m Map.! a, m Map.! b)
 
-solve2 :: Map.Map String Entry -> Entry -> Entry2
-solve2 m (Orig l) = Root l
-solve2 m e = case e of
-  Or a b -> uncurry Or2 $ sol a b
-  And a b -> uncurry And2 $ sol a b
-  Xor a b -> uncurry Xor2 $ sol a b
-  where
-    sol a b = both (solve2 m) (m Map.! a, m Map.! b)
-
 solve3 :: Map.Map String Entry -> Entry -> Entry3
 solve3 m (Orig l) = Rt l
 solve3 m e = case e of
-  Or a b -> sol (.||) a b
-  And a b -> sol (.&&) a b
-  Xor a b -> sol (.<+>) a b
+  Or a b -> sol "||" a b
+  And a b -> sol "&&" a b
+  Xor a b -> sol "xor" a b
   where
     sol f a b = uncurry (Fn f) $ both (solve3 m) (m Map.! a, m Map.! b)
 
 evalEntry3 :: Bools -> Entry3 -> Symbolic SBool
 evalEntry3 bs (Rt b) = return $ bs Map.! b
-evalEntry3 bs (Fn f a b) = do
+evalEntry3 bs (Fn fname a b) = do
   a' <- evalEntry3 bs a
   b' <- evalEntry3 bs b
   return $ f a' b'
+  where
+    f = case fname of
+      "||" -> (.||)
+      "&&" -> (.&&)
+      "xor" -> (.<+>)
 
-deps :: Entry2 -> Set.Set String
-deps (Root s) = Set.singleton s
-deps (Or2 a b) = Set.union (deps a) (deps b)
-deps (And2 a b) = Set.union (deps a) (deps b)
-deps (Xor2 a b) = Set.union (deps a) (deps b)
+deps :: Entry3 -> Set.Set String
+deps (Rt s) = Set.singleton s
+deps (Fn _ a b) = Set.union (deps a) (deps b)
 
 wiredeps :: EMap -> Entry -> Set.Set String
 wiredeps m (Orig l) = Set.empty
@@ -122,14 +125,11 @@ wiredeps m e = case e of
     f a b = filter ((`notElem` ['x', 'y']) . head) [a, b]
     sol a b = map (wiredeps m) [m Map.! a, m Map.! b]
 
-data Entry3 = Rt String | Fn (SBool -> SBool -> SBool) Entry3 Entry3
+data Entry3 = Rt String | Fn String Entry3 Entry3
 
 instance Show Entry3 where
-  show (Rt _) = "Rt <symbolic>"
-  show (Fn _ a b) = "Fn (" ++ show a ++ ") (" ++ show b ++ ")"
-
-data Entry2 = Root String | Or2 Entry2 Entry2 | And2 Entry2 Entry2 | Xor2 Entry2 Entry2
-  deriving (Show, Eq)
+  show (Rt s) = s
+  show (Fn f a b) = "(" ++ show a ++ " " ++ f ++ " " ++ show b ++ ")"
 
 data Entry = Lit Int | Or String String | And String String | Xor String String | Orig String
   deriving (Show, Eq)
