@@ -3,7 +3,6 @@
 module Day16 (part1, part2) where
 
 import Algorithm.Search (bfs, dijkstra)
-import Control.Applicative (liftA2)
 import Control.Monad.Extra (guarded)
 import Data.Function (on)
 import Data.List (delete, sortOn)

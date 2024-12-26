@@ -1,6 +1,5 @@
 module Day04 (part1, part2) where
 
-import Control.Applicative (liftA2)
 import Data.List (transpose)
 import qualified Data.Set as Set (fromList)
 import Data.Tuple.Extra (both)
