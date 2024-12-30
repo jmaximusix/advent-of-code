@@ -19,7 +19,7 @@ toV13 = fromJust . fromVector . fromList
 -- since this solution runs in O(n log n) I'm using Integers just for fun
 part1, part2 :: [String] -> Integer
 part1 = solve 2
-part2 = solve 1000000
+part2 = solve 25
 
 solve :: Int -> [String] -> Integer
 solve n = sum . map (uncurry (*) . (\s -> (chainNRobots n ('A' : s), read $ init s)))
