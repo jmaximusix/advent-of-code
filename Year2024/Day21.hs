@@ -19,16 +19,15 @@ toV13 = fromJust . fromVector . fromList
 -- since this solution runs in O(n log n) I'm using Integers just for fun
 part1, part2 :: [String] -> Integer
 part1 = solve 2
-part2 = solve 25
+part2 = solve 1000000
 
 solve :: Int -> [String] -> Integer
-solve n = sum . map (uncurry (*) . (\s -> (chainNRobots n s, read $ init s)))
+solve n = sum . map (uncurry (*) . (\s -> (chainNRobots n ('A' : s), read $ init s)))
 
 chainNRobots :: Int -> [Char] -> Integer
-chainNRobots n = fst . foldl (\(count, l) l' -> (count + moves l l', l')) (0, 'A')
+chainNRobots n k2p = moves `dot` (toV13 (1 : replicate 12 0))
   where
-    transitions = matrixPower arrowmatrix n
-    moves l l' = (transitions !* (keypad l l')) `dot` (toV13 (1 : replicate 12 0))
+    moves = matrixPower arrowmatrix n !* (sum $ zipWith keypad k2p (drop 1 k2p))
 
 keymap :: Map.Map Char (V2 Int)
 keymap =
