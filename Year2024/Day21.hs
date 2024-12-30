@@ -2,7 +2,6 @@
 
 module Day21 (part1, part2) where
 
-import Data.Bifunctor (first)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust)
 import GHC.IsList (fromList)
@@ -22,11 +21,8 @@ part1, part2 :: [String] -> Integer
 part1 = solve 2
 part2 = solve 25
 
-parseInput :: String -> (String, Integer)
-parseInput s = (s, read $ init s)
-
 solve :: Int -> [String] -> Integer
-solve n = sum . map (uncurry (*) . first (chainNRobots n) . parseInput)
+solve n = sum . map (uncurry (*) . (\s -> (chainNRobots n s, read $ init s)))
 
 chainNRobots :: Int -> [Char] -> Integer
 chainNRobots n = fst . foldl (\(count, l) l' -> (count + moves l l', l')) (0, 'A')
