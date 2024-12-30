@@ -1,8 +1,12 @@
-module MyLib.Utils (count, countEq, replace, tup2, deleteAt, readNumbers, countAll, binarySearch) where
+module MyLib.Utils (count, countEq, replace, tup2, deleteAt, readNumbers, countAll, binarySearch, matrixPower) where
 
 import Data.Char (isDigit)
 import Data.List.Extra (groupOnKey)
 import qualified Data.Map.Strict as Map
+import GHC.TypeLits (KnownNat)
+import Linear (identity)
+import Linear.Matrix ((!*!))
+import Linear.V (V)
 
 replace :: Int -> a -> [a] -> [a]
 replace i new list = take i list ++ (new : drop (i + 1) list)
@@ -37,3 +41,12 @@ binarySearch p lo hi
   | otherwise = binarySearch p (mid + 1) hi
   where
     mid = lo + (hi - lo) `div` 2
+
+-- Matrix exponentiation by squaring
+matrixPower :: (Num a, KnownNat n) => V n (V n a) -> Int -> V n (V n a)
+matrixPower m n
+  | n < 0 = error "Negative exponent"
+  | n == 0 = identity
+  | n == 1 = m
+  | even n = let halfPower = matrixPower m (n `div` 2) in halfPower !*! halfPower
+  | otherwise = m !*! matrixPower m (n - 1)
