@@ -40,7 +40,7 @@ part1 :: [String] -> Int
 part1 input = result
   where
     result = foldl (\a b -> 2 * a + (if b then 1 else 0)) 0 $ reverse solved
-    solved = map (solveLit . buildtree mappings) [Left (Z a) | a <- [0 .. 45]]
+    solved = map (solveLit . buildTree mappings) [Left (Z a) | a <- [0 .. 45]]
     mappings = parseInput Part1 input
 
 part2 :: [String] -> String
@@ -64,9 +64,9 @@ parseInput p input = Map.fromList wires
     roots = foldl insertRoot Map.empty $ map (splitOn ": ") top
     [top, bottom] = splitOn [""] input
 
-buildtree :: SymMap -> Either Label Root -> TreeEntry
-buildtree _ (Right r) = Root r
-buildtree m (Left l) = Wire l op (buildtree m a) (buildtree m b)
+buildTree :: SymMap -> Either Label Root -> TreeEntry
+buildTree _ (Right r) = Root r
+buildTree m (Left l) = Wire l op (buildTree m a) (buildTree m b)
   where
     (op, a, b) = m Map.! l
 
@@ -86,14 +86,14 @@ isGoal (symmap, s)
   | Set.size s /= 8 = False
   | otherwise = isNothing maybeBreakingAt
   where
-    zts = map (buildtree symmap) [Left (Z a) | a <- [0 .. 45]]
+    zts = map (buildTree symmap) [Left (Z a) | a <- [0 .. 45]]
     maybeBreakingAt = binarySearch (not . liftA2 zNCorrect id (zts !!)) 0 45
 
 next :: (SymMap, Set.Set Label) -> [(SymMap, Set.Set Label)]
 next (symmap, swapped) = newsymmaps
   where
-    trees = Map.mapWithKey (\k _ -> buildtree symmap (Left k)) symmap
-    zts = map (buildtree symmap) [Left (Z a) | a <- [0 .. 45]]
+    trees = Map.mapWithKey (\k _ -> buildTree symmap (Left k)) symmap
+    zts = map (buildTree symmap) [Left (Z a) | a <- [0 .. 45]]
     (Just br) = binarySearch (not . liftA2 zNCorrect id (zts !!)) 0 45
     toSwap = wiredeps $ zts !! br
     excl1 = wiredeps $ zts !! (br - 1)
@@ -101,7 +101,7 @@ next (symmap, swapped) = newsymmaps
     toSwap' = toSwap `Set.difference` (Set.union swapped excl1)
     candidates = pot `Set.difference` (Set.unions [swapped, excl1])
     newsymmaps =
-      filter (\(a, _) -> zNCorrect br (buildtree a (Left (Z br)))) $
+      filter (\(a, _) -> zNCorrect br (buildTree a (Left (Z br)))) $
         map
           (swapInMap symmap swapped)
           [ (a, b)
@@ -134,7 +134,11 @@ isRelevant n s =
 
 zNCorrect :: Int -> TreeEntry -> Bool
 zNCorrect n zn = unsafePerformIO $ SBV.isTheorem $ do
-  bools <- fmap Map.fromList $ sequence $ map (\c -> fmap (c,) $ SBV.sBools [show (Sym c a) | a <- [0 .. 44]]) ['x', 'y']
+  bools <-
+    fmap Map.fromList
+      . sequence
+      . map (\c -> fmap (c,) $ SBV.sBools [show (Sym c a) | a <- [0 .. 44]])
+      $ ['x', 'y']
   let toSInt64 = foldl (\acc a -> 2 * acc + (SBV.oneIf a)) (0 :: SBV.SInt64) . reverse
   let sIntSum = sum $ map toSInt64 $ Map.elems bools
   let control = (sIntSum SBV..>>. n) `SBV.sMod` 2 SBV..== 1
